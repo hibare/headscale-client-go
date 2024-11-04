@@ -1,0 +1,29 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+      - id: check-shebang-scripts-are-executable
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-mod-tidy
+      - id: go-fmt
+      - id: go-vet
+      - id: golangci-lint
+      - id: go-build
+  - repo: local
+    hooks:
+      - id: run-go-tests
+        name: Run Go Tests
+        entry: go test -v ./... -cover
+        language: system
+        types: [go]
