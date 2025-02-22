@@ -35,7 +35,7 @@ func TestUserResource_List(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(UsersResponse{Users: expectedUsers})
+			_ = json.NewEncoder(w).Encode(UsersResponse{Users: expectedUsers})
 		})
 
 		users, err := client.Users().List(context.Background())
@@ -77,7 +77,7 @@ func TestUserResource_Get(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(UserResponse{User: expectedUser})
+			_ = json.NewEncoder(w).Encode(UserResponse{User: expectedUser})
 		})
 
 		user, err := client.Users().Get(context.Background(), "1")
@@ -129,7 +129,7 @@ func TestUserResource_Create(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(expectedUser)
+			_ = json.NewEncoder(w).Encode(expectedUser)
 		})
 
 		user, err := client.Users().Create(context.Background(), "new-user")

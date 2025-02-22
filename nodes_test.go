@@ -35,7 +35,7 @@ func TestNodeResource_List(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(NodesResponse{Nodes: expectedNodes})
+			_ = json.NewEncoder(w).Encode(NodesResponse{Nodes: expectedNodes})
 		})
 
 		nodes, err := client.Nodes().List(context.Background())
@@ -77,7 +77,7 @@ func TestNodeResource_Get(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
+			_ = json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
 		})
 
 		node, err := client.Nodes().Get(context.Background(), "1")
@@ -123,7 +123,7 @@ func TestNodeResource_Register(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
+			_ = json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
 		})
 
 		node, err := client.Nodes().Register(context.Background(), "test-user", "test-key")
@@ -231,7 +231,7 @@ func TestNodeResource_Rename(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
+			_ = json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
 		})
 
 		node, err := client.Nodes().Rename(context.Background(), "1", "new-name")
@@ -275,7 +275,7 @@ func TestNodeResource_GetRoutes(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(RoutesResponse{Routes: expectedRoutes})
+			_ = json.NewEncoder(w).Encode(RoutesResponse{Routes: expectedRoutes})
 		})
 
 		routes, err := client.Nodes().GetRoutes(context.Background(), "1")
@@ -323,7 +323,7 @@ func TestNodeResource_AddTags(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
+			_ = json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
 		})
 
 		node, err := client.Nodes().AddTags(context.Background(), "1", []string{"tag1", "tag2"})
@@ -369,7 +369,7 @@ func TestNodeResource_UpdateUser(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
+			_ = json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
 		})
 
 		node, err := client.Nodes().UpdateUser(context.Background(), "1", "new-user")

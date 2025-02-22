@@ -35,7 +35,7 @@ func TestRoutesResource_List(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(RoutesResponse{Routes: expectedRoutes})
+			_ = json.NewEncoder(w).Encode(RoutesResponse{Routes: expectedRoutes})
 		})
 
 		routes, err := client.Routes().List(context.Background())

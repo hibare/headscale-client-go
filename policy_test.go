@@ -31,7 +31,7 @@ func TestPolicyResource_Get(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(expectedPolicy)
+			_ = json.NewEncoder(w).Encode(expectedPolicy)
 		})
 
 		policy, err := client.Policy().Get(context.Background())

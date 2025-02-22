@@ -35,7 +35,7 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(PreAuthKeysResponse{PreAuthKeys: expectedKeys})
+			_ = json.NewEncoder(w).Encode(PreAuthKeysResponse{PreAuthKeys: expectedKeys})
 		})
 
 		keys, err := client.PreAuthKeys().List(context.Background())
@@ -91,7 +91,7 @@ func TestPreAuthKeyResource_Create(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(expectedKey)
+			_ = json.NewEncoder(w).Encode(expectedKey)
 		})
 
 		key, err := client.PreAuthKeys().Create(context.Background(), "test-user", true, false, fixedTime.Add(24*time.Hour), []string{"tag1", "tag2"})

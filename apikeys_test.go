@@ -35,7 +35,7 @@ func TestAPIKeyResource_List(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(APIKeysResponse{APIKeys: expectedKeys})
+			_ = json.NewEncoder(w).Encode(APIKeysResponse{APIKeys: expectedKeys})
 		})
 
 		keys, err := client.APIKeys().List(context.Background())
@@ -88,7 +88,7 @@ func TestAPIKeyResource_Create(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(expectedKey)
+			_ = json.NewEncoder(w).Encode(expectedKey)
 		})
 
 		key, err := client.APIKeys().Create(context.Background(), expiration)
