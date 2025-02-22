@@ -20,6 +20,7 @@ type HeadscaleClientInterface interface {
 	Policy() *PolicyResource
 	Routes() *RoutesResource
 	Users() *UserResource
+	PreAuthKeys() *PreAuthKeyResource
 	buildURL(pathParts ...any) *url.URL
 	buildRequest(ctx context.Context, method string, uri *url.URL, opt requestOptions) (*http.Request, error)
 	do(ctx context.Context, req *http.Request, v interface{}) error
@@ -33,11 +34,12 @@ type Client struct {
 	Logger    Logger
 
 	// Specific resources
-	apiKeys *APIKeyResource
-	nodes   *NodeResource
-	policy  *PolicyResource
-	routes  *RoutesResource
-	users   *UserResource
+	apiKeys     *APIKeyResource
+	nodes       *NodeResource
+	policy      *PolicyResource
+	routes      *RoutesResource
+	users       *UserResource
+	preAuthKeys *PreAuthKeyResource
 }
 
 func (c *Client) APIKeys() *APIKeyResource {
@@ -58,6 +60,10 @@ func (c *Client) Users() *UserResource {
 
 func (c *Client) Routes() *RoutesResource {
 	return c.routes
+}
+
+func (c *Client) PreAuthKeys() *PreAuthKeyResource {
+	return c.preAuthKeys
 }
 
 func (c *Client) buildURL(pathParts ...any) *url.URL {
@@ -188,6 +194,7 @@ func NewClient(baseURL, apiKey string, opt HeadscaleClientOptions) (HeadscaleCli
 	c.policy = &PolicyResource{c}
 	c.routes = &RoutesResource{c}
 	c.users = &UserResource{c}
+	c.preAuthKeys = &PreAuthKeyResource{c}
 
 	return c, nil
 }

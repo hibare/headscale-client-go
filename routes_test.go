@@ -2,113 +2,153 @@ package headscale
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"net/http"
-	"net/url"
 	"testing"
+	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRoutesResource_List(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		routesResource := &RoutesResource{Client: client}
-		client.(*MockClient).On("buildURL", "routes").Return(&url.URL{Path: "http://example.com/api/v1/routes"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/routes"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*RoutesResponse)
-			resp.Routes = []Route{{ID: "1", Prefix: "192.168.1.0/24"}}
+		expectedRoutes := []Route{
+			{
+				ID:        "1",
+				Prefix:    "192.168.1.0/24",
+				CreatedAt: time.Date(2025, 2, 22, 10, 0, 0, 0, time.UTC),
+			},
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodGet {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/routes" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(RoutesResponse{Routes: expectedRoutes})
 		})
 
-		routes, err := routesResource.List(context.Background())
-		assert.NoError(t, err)
-		assert.Len(t, routes.Routes, 1)
-		assert.Equal(t, "192.168.1.0/24", routes.Routes[0].Prefix)
+		routes, err := client.Routes().List(context.Background())
+		require.NoError(t, err)
+		require.Equal(t, expectedRoutes, routes.Routes)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		routesResource := &RoutesResource{Client: client}
-		client.(*MockClient).On("buildURL", "routes").Return(&url.URL{Path: "http://example.com/api/v1/routes"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/routes"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusInternalServerError)
+		})
 
-		routes, err := routesResource.List(context.Background())
-		assert.Error(t, err)
-		assert.Empty(t, routes.Routes)
+		routes, err := client.Routes().List(context.Background())
+		require.Error(t, err)
+		require.Empty(t, routes.Routes)
 	})
 }
 
 func TestRoutesResource_Delete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		routesResource := &RoutesResource{Client: client}
-		client.(*MockClient).On("buildURL", "routes", "1").Return(&url.URL{Path: "http://example.com/api/v1/routes/1"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodDelete, &url.URL{Path: "http://example.com/api/v1/routes/1"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil)
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodDelete {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/routes/1" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-		err := routesResource.Delete(context.Background(), "1")
-		assert.NoError(t, err)
+			w.WriteHeader(http.StatusOK)
+		})
+
+		err := client.Routes().Delete(context.Background(), "1")
+		require.NoError(t, err)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		routesResource := &RoutesResource{Client: client}
-		client.(*MockClient).On("buildURL", "routes", "1").Return(&url.URL{Path: "http://example.com/api/v1/routes/1"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodDelete, &url.URL{Path: "http://example.com/api/v1/routes/1"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		})
 
-		err := routesResource.Delete(context.Background(), "1")
-		assert.Error(t, err)
-	})
-}
-
-func TestRoutesResource_Disable(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		routesResource := &RoutesResource{Client: client}
-		client.(*MockClient).On("buildURL", "routes", "1", "disable").Return(&url.URL{Path: "http://example.com/api/v1/routes/1/disable"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/routes/1/disable"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil)
-
-		err := routesResource.Disable(context.Background(), "1")
-		assert.NoError(t, err)
-	})
-
-	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		routesResource := &RoutesResource{Client: client}
-		client.(*MockClient).On("buildURL", "routes", "1", "disable").Return(&url.URL{Path: "http://example.com/api/v1/routes/1/disable"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/routes/1/disable"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
-
-		err := routesResource.Disable(context.Background(), "1")
-		assert.Error(t, err)
+		err := client.Routes().Delete(context.Background(), "1")
+		require.Error(t, err)
 	})
 }
 
 func TestRoutesResource_Enable(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		routesResource := &RoutesResource{Client: client}
-		client.(*MockClient).On("buildURL", "routes", "1", "enable").Return(&url.URL{Path: "http://example.com/api/v1/routes/1/enable"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/routes/1/enable"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil)
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/routes/1/enable" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-		err := routesResource.Enable(context.Background(), "1")
-		assert.NoError(t, err)
+			w.WriteHeader(http.StatusOK)
+		})
+
+		err := client.Routes().Enable(context.Background(), "1")
+		require.NoError(t, err)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		routesResource := &RoutesResource{Client: client}
-		client.(*MockClient).On("buildURL", "routes", "1", "enable").Return(&url.URL{Path: "http://example.com/api/v1/routes/1/enable"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/routes/1/enable"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
 
-		err := routesResource.Enable(context.Background(), "1")
-		assert.Error(t, err)
+		err := client.Routes().Enable(context.Background(), "1")
+		require.Error(t, err)
+	})
+}
+
+func TestRoutesResource_Disable(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/routes/1/disable" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+		})
+
+		err := client.Routes().Disable(context.Background(), "1")
+		require.NoError(t, err)
+	})
+
+	t.Run("error", func(t *testing.T) {
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
+
+		err := client.Routes().Disable(context.Background(), "1")
+		require.Error(t, err)
 	})
 }

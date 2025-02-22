@@ -2,280 +2,388 @@ package headscale
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"net/http"
-	"net/url"
 	"testing"
+	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNodeResource_List(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node").Return(&url.URL{Path: "http://example.com/api/v1/node"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/node"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*NodesResponse)
-			resp.Nodes = []Node{{ID: "1", Name: "test-node"}}
+		expectedNodes := []Node{
+			{
+				ID:        "1",
+				Name:      "test-node",
+				CreatedAt: time.Date(2025, 2, 22, 10, 0, 0, 0, time.UTC),
+			},
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodGet {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/node" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(NodesResponse{Nodes: expectedNodes})
 		})
 
-		nodes, err := nodeResource.List(context.Background())
-		assert.NoError(t, err)
-		assert.Len(t, nodes.Nodes, 1)
-		assert.Equal(t, "test-node", nodes.Nodes[0].Name)
+		nodes, err := client.Nodes().List(context.Background())
+		require.NoError(t, err)
+		require.Equal(t, expectedNodes, nodes.Nodes)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node").Return(&url.URL{Path: "http://example.com/api/v1/node"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/node"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusInternalServerError)
+		})
 
-		nodes, err := nodeResource.List(context.Background())
-		assert.Error(t, err)
-		assert.Empty(t, nodes.Nodes)
+		nodes, err := client.Nodes().List(context.Background())
+		require.Error(t, err)
+		require.Empty(t, nodes.Nodes)
 	})
 }
 
 func TestNodeResource_Get(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1").Return(&url.URL{Path: "http://example.com/api/v1/node/1"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/node/1"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*NodeResponse)
-			resp.Node = Node{ID: "1", Name: "test-node"}
+		expectedNode := Node{
+			ID:        "1",
+			Name:      "test-node",
+			CreatedAt: time.Date(2025, 2, 22, 10, 0, 0, 0, time.UTC),
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodGet {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/node/1" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
 		})
 
-		node, err := nodeResource.Get(context.Background(), "1")
-		assert.NoError(t, err)
-		assert.Equal(t, "test-node", node.Node.Name)
+		node, err := client.Nodes().Get(context.Background(), "1")
+		require.NoError(t, err)
+		require.Equal(t, expectedNode, node.Node)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1").Return(&url.URL{Path: "http://example.com/api/v1/node/1"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/node/1"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		})
 
-		node, err := nodeResource.Get(context.Background(), "1")
-		assert.Error(t, err)
-		assert.Empty(t, node.Node)
+		node, err := client.Nodes().Get(context.Background(), "1")
+		require.Error(t, err)
+		require.Empty(t, node.Node)
 	})
 }
+
 func TestNodeResource_Register(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node").Return(&url.URL{Path: "http://example.com/api/v1/node"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/node"}, requestOptions{
-			queryParams: map[string]interface{}{
-				"user": "test-user",
-				"key":  "test-key",
-			},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*NodeResponse)
-			resp.Node = Node{ID: "1", Name: "test-node"}
+		expectedNode := Node{
+			ID:        "1",
+			Name:      "test-node",
+			CreatedAt: time.Date(2025, 2, 22, 10, 0, 0, 0, time.UTC),
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/node" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			if r.URL.Query().Get("user") != "test-user" || r.URL.Query().Get("key") != "test-key" {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
 		})
 
-		node, err := nodeResource.Register(context.Background(), "test-user", "test-key")
-		assert.NoError(t, err)
-		assert.Equal(t, "test-node", node.Node.Name)
+		node, err := client.Nodes().Register(context.Background(), "test-user", "test-key")
+		require.NoError(t, err)
+		require.Equal(t, expectedNode, node.Node)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node").Return(&url.URL{Path: "http://example.com/api/v1/node"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/node"}, requestOptions{
-			queryParams: map[string]interface{}{
-				"user": "test-user",
-				"key":  "test-key",
-			},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
 
-		node, err := nodeResource.Register(context.Background(), "test-user", "test-key")
-		assert.Error(t, err)
-		assert.Empty(t, node.Node)
+		node, err := client.Nodes().Register(context.Background(), "test-user", "test-key")
+		require.Error(t, err)
+		require.Empty(t, node.Node)
 	})
 }
+
 func TestNodeResource_Delete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1").Return(&url.URL{Path: "http://example.com/api/v1/node/1"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodDelete, &url.URL{Path: "http://example.com/api/v1/node/1"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil)
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodDelete {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/node/1" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-		err := nodeResource.Delete(context.Background(), "1")
-		assert.NoError(t, err)
+			w.WriteHeader(http.StatusOK)
+		})
+
+		err := client.Nodes().Delete(context.Background(), "1")
+		require.NoError(t, err)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1").Return(&url.URL{Path: "http://example.com/api/v1/node/1"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodDelete, &url.URL{Path: "http://example.com/api/v1/node/1"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		})
 
-		err := nodeResource.Delete(context.Background(), "1")
-		assert.Error(t, err)
+		err := client.Nodes().Delete(context.Background(), "1")
+		require.Error(t, err)
 	})
 }
+
 func TestNodeResource_Expire(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1", "expire").Return(&url.URL{Path: "http://example.com/api/v1/node/1/expire"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/node/1/expire"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil)
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/node/1/expire" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-		err := nodeResource.Expire(context.Background(), "1")
-		assert.NoError(t, err)
+			w.WriteHeader(http.StatusOK)
+		})
+
+		err := client.Nodes().Expire(context.Background(), "1")
+		require.NoError(t, err)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1", "expire").Return(&url.URL{Path: "http://example.com/api/v1/node/1/expire"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/node/1/expire"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
 
-		err := nodeResource.Expire(context.Background(), "1")
-		assert.Error(t, err)
+		err := client.Nodes().Expire(context.Background(), "1")
+		require.Error(t, err)
 	})
 }
+
 func TestNodeResource_Rename(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1", "rename", "new-name").Return(&url.URL{Path: "http://example.com/api/v1/node/1/rename/new-name"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/node/1/rename/new-name"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*NodeResponse)
-			resp.Node = Node{ID: "1", Name: "new-name"}
+		expectedNode := Node{
+			ID:        "1",
+			Name:      "new-name",
+			CreatedAt: time.Date(2025, 2, 22, 10, 0, 0, 0, time.UTC),
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/node/1/rename/new-name" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
 		})
 
-		node, err := nodeResource.Rename(context.Background(), "1", "new-name")
-		assert.NoError(t, err)
-		assert.Equal(t, "new-name", node.Node.Name)
+		node, err := client.Nodes().Rename(context.Background(), "1", "new-name")
+		require.NoError(t, err)
+		require.Equal(t, expectedNode, node.Node)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1", "rename", "new-name").Return(&url.URL{Path: "http://example.com/api/v1/node/1/rename/new-name"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/node/1/rename/new-name"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
 
-		node, err := nodeResource.Rename(context.Background(), "1", "new-name")
-		assert.Error(t, err)
-		assert.Empty(t, node.Node)
+		node, err := client.Nodes().Rename(context.Background(), "1", "new-name")
+		require.Error(t, err)
+		require.Empty(t, node.Node)
 	})
 }
+
 func TestNodeResource_GetRoutes(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1", "routes").Return(&url.URL{Path: "http://example.com/api/v1/node/1/routes"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/node/1/routes"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*RoutesResponse)
-			resp.Routes = []Route{{ID: "1", Prefix: "192.168.1.0/24"}}
+		expectedRoutes := []Route{
+			{
+				ID:        "1",
+				Prefix:    "192.168.1.0/24",
+				CreatedAt: time.Date(2025, 2, 22, 10, 0, 0, 0, time.UTC),
+			},
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodGet {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/node/1/routes" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(RoutesResponse{Routes: expectedRoutes})
 		})
 
-		routes, err := nodeResource.GetRoutes(context.Background(), "1")
-		assert.NoError(t, err)
-		assert.Len(t, routes.Routes, 1)
-		assert.Equal(t, "192.168.1.0/24", routes.Routes[0].Prefix)
+		routes, err := client.Nodes().GetRoutes(context.Background(), "1")
+		require.NoError(t, err)
+		require.Equal(t, expectedRoutes, routes.Routes)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1", "routes").Return(&url.URL{Path: "http://example.com/api/v1/node/1/routes"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/node/1/routes"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		})
 
-		routes, err := nodeResource.GetRoutes(context.Background(), "1")
-		assert.Error(t, err)
-		assert.Empty(t, routes.Routes)
+		routes, err := client.Nodes().GetRoutes(context.Background(), "1")
+		require.Error(t, err)
+		require.Empty(t, routes.Routes)
 	})
 }
+
 func TestNodeResource_AddTags(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1", "tags").Return(&url.URL{Path: "http://example.com/api/v1/node/1/tags"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/node/1/tags"}, requestOptions{
-			body: AddTagsRequest{Tags: []string{"tag1", "tag2"}},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*NodeResponse)
-			resp.Node = Node{ID: "1", Name: "test-node"}
+		expectedNode := Node{
+			ID:        "1",
+			Name:      "test-node",
+			CreatedAt: time.Date(2025, 2, 22, 10, 0, 0, 0, time.UTC),
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/node/1/tags" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			var req AddTagsRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
 		})
 
-		node, err := nodeResource.AddTags(context.Background(), "1", []string{"tag1", "tag2"})
-		assert.NoError(t, err)
-		assert.Equal(t, "test-node", node.Node.Name)
+		node, err := client.Nodes().AddTags(context.Background(), "1", []string{"tag1", "tag2"})
+		require.NoError(t, err)
+		require.Equal(t, expectedNode, node.Node)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1", "tags").Return(&url.URL{Path: "http://example.com/api/v1/node/1/tags"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/node/1/tags"}, requestOptions{
-			body: AddTagsRequest{Tags: []string{"tag1", "tag2"}},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
 
-		node, err := nodeResource.AddTags(context.Background(), "1", []string{"tag1", "tag2"})
-		assert.Error(t, err)
-		assert.Empty(t, node.Node)
+		node, err := client.Nodes().AddTags(context.Background(), "1", []string{"tag1", "tag2"})
+		require.Error(t, err)
+		require.Empty(t, node.Node)
 	})
 }
 
 func TestNodeResource_UpdateUser(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1", "user").Return(&url.URL{Path: "http://example.com/api/v1/node/1/user"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/node/1/user"}, requestOptions{
-			queryParams: map[string]interface{}{
-				"user": "new-user",
-			},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*NodeResponse)
-			resp.Node = Node{ID: "1", Name: "test-node"}
+		expectedNode := Node{
+			ID:        "1",
+			Name:      "test-node",
+			CreatedAt: time.Date(2025, 2, 22, 10, 0, 0, 0, time.UTC),
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/node/1/user" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			if r.URL.Query().Get("user") != "new-user" {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(NodeResponse{Node: expectedNode})
 		})
 
-		node, err := nodeResource.UpdateUser(context.Background(), "1", "new-user")
-		assert.NoError(t, err)
-		assert.Equal(t, "test-node", node.Node.Name)
+		node, err := client.Nodes().UpdateUser(context.Background(), "1", "new-user")
+		require.NoError(t, err)
+		require.Equal(t, expectedNode, node.Node)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		nodeResource := &NodeResource{Client: client}
-		client.(*MockClient).On("buildURL", "node", "1", "user").Return(&url.URL{Path: "http://example.com/api/v1/node/1/user"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/node/1/user"}, requestOptions{
-			queryParams: map[string]interface{}{
-				"user": "new-user",
-			},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
 
-		node, err := nodeResource.UpdateUser(context.Background(), "1", "new-user")
-		assert.Error(t, err)
-		assert.Empty(t, node.Node)
+		node, err := client.Nodes().UpdateUser(context.Background(), "1", "new-user")
+		require.Error(t, err)
+		require.Empty(t, node.Node)
 	})
 }

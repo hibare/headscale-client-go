@@ -2,70 +2,93 @@ package headscale
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"net/http"
-	"net/url"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPolicyResource_Get(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		policyResource := &PolicyResource{Client: client}
-		client.(*MockClient).On("buildURL", "policy").Return(&url.URL{Path: "http://example.com/api/v1/policy"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/policy"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*Policy)
-			resp.Policy = "test-policy"
-			resp.UpdatedAt = "2024-01-01T00:00:00Z"
+		expectedPolicy := Policy{
+			Policy:    "test-policy",
+			UpdatedAt: "2025-02-22T10:00:00Z",
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodGet {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/policy" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(expectedPolicy)
 		})
 
-		policy, err := policyResource.Get(context.Background())
-		assert.NoError(t, err)
-		assert.Equal(t, "test-policy", policy.Policy)
-		assert.Equal(t, "2024-01-01T00:00:00Z", policy.UpdatedAt)
+		policy, err := client.Policy().Get(context.Background())
+		require.NoError(t, err)
+		require.Equal(t, expectedPolicy, policy)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		policyResource := &PolicyResource{Client: client}
-		client.(*MockClient).On("buildURL", "policy").Return(&url.URL{Path: "http://example.com/api/v1/policy"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/policy"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusInternalServerError)
+		})
 
-		policy, err := policyResource.Get(context.Background())
-		assert.Error(t, err)
-		assert.Empty(t, policy.Policy)
+		policy, err := client.Policy().Get(context.Background())
+		require.Error(t, err)
+		require.Empty(t, policy.Policy)
 	})
 }
 
 func TestPolicyResource_Put(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		policyResource := &PolicyResource{Client: client}
-		client.(*MockClient).On("buildURL", "policy").Return(&url.URL{Path: "http://example.com/api/v1/policy"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPut, &url.URL{Path: "http://example.com/api/v1/policy"}, requestOptions{
-			body: UpdatePolicyRequest{Policy: "new-policy"},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil)
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPut {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/policy" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-		err := policyResource.Put(context.Background(), "new-policy")
-		assert.NoError(t, err)
+			var req UpdatePolicyRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			if req.Policy != "new-policy" {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+		})
+
+		err := client.Policy().Put(context.Background(), "new-policy")
+		require.NoError(t, err)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		policyResource := &PolicyResource{Client: client}
-		client.(*MockClient).On("buildURL", "policy").Return(&url.URL{Path: "http://example.com/api/v1/policy"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPut, &url.URL{Path: "http://example.com/api/v1/policy"}, requestOptions{
-			body: UpdatePolicyRequest{Policy: "new-policy"},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
 
-		err := policyResource.Put(context.Background(), "new-policy")
-		assert.Error(t, err)
+		err := client.Policy().Put(context.Background(), "new-policy")
+		require.Error(t, err)
 	})
 }
