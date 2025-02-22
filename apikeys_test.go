@@ -2,130 +2,183 @@ package headscale
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"net/http"
-	"net/url"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIKeyResource_List(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		apiKeyResource := &APIKeyResource{Client: client}
-		client.(*MockClient).On("buildURL", "apikey").Return(&url.URL{Path: "http://example.com/api/v1/apikey"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/apikey"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*APIKeysResponse)
-			resp.APIKeys = []APIKey{{ID: "1", Prefix: "test-prefix"}}
+		expectedKeys := []APIKey{
+			{
+				ID:        "1",
+				Prefix:    "test-prefix",
+				CreatedAt: time.Date(2025, 2, 22, 10, 0, 0, 0, time.UTC),
+			},
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodGet {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/apikey" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(APIKeysResponse{APIKeys: expectedKeys})
 		})
 
-		keys, err := apiKeyResource.List(context.Background())
-		assert.NoError(t, err)
-		assert.Len(t, keys.APIKeys, 1)
-		assert.Equal(t, "test-prefix", keys.APIKeys[0].Prefix)
+		keys, err := client.APIKeys().List(context.Background())
+		require.NoError(t, err)
+		require.Equal(t, expectedKeys, keys.APIKeys)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		apiKeyResource := &APIKeyResource{Client: client}
-		client.(*MockClient).On("buildURL", "apikey").Return(&url.URL{Path: "http://example.com/api/v1/apikey"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/apikey"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusInternalServerError)
+		})
 
-		keys, err := apiKeyResource.List(context.Background())
-		assert.Error(t, err)
-		assert.Empty(t, keys.APIKeys)
+		keys, err := client.APIKeys().List(context.Background())
+		require.Error(t, err)
+		require.Empty(t, keys.APIKeys)
 	})
 }
 
 func TestAPIKeyResource_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		apiKeyResource := &APIKeyResource{Client: client}
-		expiration := time.Now().Add(24 * time.Hour)
-		client.(*MockClient).On("buildURL", "apikey").Return(&url.URL{Path: "http://example.com/api/v1/apikey"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/apikey"}, requestOptions{
-			body: AddAPIKeyRequest{Expiration: expiration},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*APIKey)
-			resp.ID = "1"
-			resp.Prefix = "test-prefix"
+		expiration := time.Date(2025, 2, 23, 10, 0, 0, 0, time.UTC)
+		expectedKey := APIKey{
+			ID:        "1",
+			Prefix:    "test-prefix",
+			CreatedAt: time.Date(2025, 2, 22, 10, 0, 0, 0, time.UTC),
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/apikey" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			var req AddAPIKeyRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			if req.Expiration != expiration {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(expectedKey)
 		})
 
-		key, err := apiKeyResource.Create(context.Background(), expiration)
-		assert.NoError(t, err)
-		assert.Equal(t, "test-prefix", key.Prefix)
+		key, err := client.APIKeys().Create(context.Background(), expiration)
+		require.NoError(t, err)
+		require.Equal(t, expectedKey, key)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		apiKeyResource := &APIKeyResource{Client: client}
-		expiration := time.Now().Add(24 * time.Hour)
-		client.(*MockClient).On("buildURL", "apikey").Return(&url.URL{Path: "http://example.com/api/v1/apikey"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/apikey"}, requestOptions{
-			body: AddAPIKeyRequest{Expiration: expiration},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
 
-		key, err := apiKeyResource.Create(context.Background(), expiration)
-		assert.Error(t, err)
-		assert.Empty(t, key.ID)
+		key, err := client.APIKeys().Create(context.Background(), time.Now().Add(24*time.Hour))
+		require.Error(t, err)
+		require.Empty(t, key)
 	})
 }
 
 func TestAPIKeyResource_Expire(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		apiKeyResource := &APIKeyResource{Client: client}
-		client.(*MockClient).On("buildURL", "apikey", "expire").Return(&url.URL{Path: "http://example.com/api/v1/apikey/expire"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/apikey/expire"}, requestOptions{
-			body: ExpireAPIKeyRequest{Prefix: "test-prefix"},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil)
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/apikey/expire" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-		err := apiKeyResource.Expire(context.Background(), "test-prefix")
-		assert.NoError(t, err)
+			var req ExpireAPIKeyRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			if req.Prefix != "test-prefix" {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+		})
+
+		err := client.APIKeys().Expire(context.Background(), "test-prefix")
+		require.NoError(t, err)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		apiKeyResource := &APIKeyResource{Client: client}
-		client.(*MockClient).On("buildURL", "apikey", "expire").Return(&url.URL{Path: "http://example.com/api/v1/apikey/expire"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/apikey/expire"}, requestOptions{
-			body: ExpireAPIKeyRequest{Prefix: "test-prefix"},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
 
-		err := apiKeyResource.Expire(context.Background(), "test-prefix")
-		assert.Error(t, err)
+		err := client.APIKeys().Expire(context.Background(), "test-prefix")
+		require.Error(t, err)
 	})
 }
 
 func TestAPIKeyResource_Delete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		apiKeyResource := &APIKeyResource{Client: client}
-		client.(*MockClient).On("buildURL", "apikey", "test-prefix").Return(&url.URL{Path: "http://example.com/api/v1/apikey/test-prefix"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodDelete, &url.URL{Path: "http://example.com/api/v1/apikey/test-prefix"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil)
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodDelete {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/apikey/test-prefix" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-		err := apiKeyResource.Delete(context.Background(), "test-prefix")
-		assert.NoError(t, err)
+			w.WriteHeader(http.StatusOK)
+		})
+
+		err := client.APIKeys().Delete(context.Background(), "test-prefix")
+		require.NoError(t, err)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		apiKeyResource := &APIKeyResource{Client: client}
-		client.(*MockClient).On("buildURL", "apikey", "test-prefix").Return(&url.URL{Path: "http://example.com/api/v1/apikey/test-prefix"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodDelete, &url.URL{Path: "http://example.com/api/v1/apikey/test-prefix"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		})
 
-		err := apiKeyResource.Delete(context.Background(), "test-prefix")
-		assert.Error(t, err)
+		err := client.APIKeys().Delete(context.Background(), "test-prefix")
+		require.Error(t, err)
 	})
 }

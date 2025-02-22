@@ -57,3 +57,8 @@ func (m *MockClient) Routes() *RoutesResource {
 	args := m.Called()
 	return args.Get(0).(*RoutesResource)
 }
+
+func (m *MockClient) PreAuthKeys() *PreAuthKeyResource {
+	args := m.Called()
+	return args.Get(0).(*PreAuthKeyResource)
+}

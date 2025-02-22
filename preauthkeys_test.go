@@ -2,124 +2,149 @@ package headscale
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"net/http"
-	"net/url"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPreAuthKeyResource_List(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		preAuthKeyResource := &PreAuthKeyResource{Client: client}
-		client.(*MockClient).On("buildURL", "preauthkey").Return(&url.URL{Path: "http://example.com/api/v1/preauthkey"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/preauthkey"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*PreAuthKeysResponse)
-			resp.PreAuthKeys = []PreAuthKey{{ID: "1", Key: "test-key"}}
+		expectedKeys := []PreAuthKey{
+			{
+				ID:        "1",
+				Key:       "test-key",
+				CreatedAt: time.Date(2025, 2, 22, 10, 0, 0, 0, time.UTC),
+			},
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodGet {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/preauthkey" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(PreAuthKeysResponse{PreAuthKeys: expectedKeys})
 		})
 
-		keys, err := preAuthKeyResource.List(context.Background())
-		assert.NoError(t, err)
-		assert.Len(t, keys.PreAuthKeys, 1)
-		assert.Equal(t, "test-key", keys.PreAuthKeys[0].Key)
+		keys, err := client.PreAuthKeys().List(context.Background())
+		require.NoError(t, err)
+		require.Equal(t, expectedKeys, keys.PreAuthKeys)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		preAuthKeyResource := &PreAuthKeyResource{Client: client}
-		client.(*MockClient).On("buildURL", "preauthkey").Return(&url.URL{Path: "http://example.com/api/v1/preauthkey"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodGet, &url.URL{Path: "http://example.com/api/v1/preauthkey"}, requestOptions{}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusInternalServerError)
+		})
 
-		keys, err := preAuthKeyResource.List(context.Background())
-		assert.Error(t, err)
-		assert.Empty(t, keys.PreAuthKeys)
+		keys, err := client.PreAuthKeys().List(context.Background())
+		require.Error(t, err)
+		require.Empty(t, keys.PreAuthKeys)
 	})
 }
 
 func TestPreAuthKeyResource_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		preAuthKeyResource := &PreAuthKeyResource{Client: client}
-		expiration := time.Now().Add(24 * time.Hour)
-		client.(*MockClient).On("buildURL", "preauthkey").Return(&url.URL{Path: "http://example.com/api/v1/preauthkey"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/preauthkey"}, requestOptions{
-			body: CreatePreAuthKeyRequest{
+		fixedTime := time.Date(2025, 2, 22, 10, 0, 0, 0, time.UTC)
+		expectedKey := PreAuthKeyResponse{
+			PreAuthKey: []PreAuthKey{{
+				ID:         "1",
+				Key:        "test-key",
 				User:       "test-user",
 				Reusable:   true,
 				Ephemeral:  false,
-				Expiration: expiration,
+				CreatedAt:  fixedTime,
+				Expiration: fixedTime.Add(24 * time.Hour),
 				AclTags:    []string{"tag1", "tag2"},
-			},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-			resp := args.Get(1).(*PreAuthKeyResponse)
-			resp.PreAuthKey = []PreAuthKey{{ID: "1", Key: "test-key"}}
+			}},
+		}
+
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/preauthkey" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			var req CreatePreAuthKeyRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(expectedKey)
 		})
 
-		key, err := preAuthKeyResource.Create(context.Background(), "test-user", true, false, expiration, []string{"tag1", "tag2"})
-		assert.NoError(t, err)
-		assert.Len(t, key.PreAuthKey, 1)
-		assert.Equal(t, "test-key", key.PreAuthKey[0].Key)
+		key, err := client.PreAuthKeys().Create(context.Background(), "test-user", true, false, fixedTime.Add(24*time.Hour), []string{"tag1", "tag2"})
+		require.NoError(t, err)
+		require.Equal(t, expectedKey.PreAuthKey, key.PreAuthKey)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		preAuthKeyResource := &PreAuthKeyResource{Client: client}
-		expiration := time.Now().Add(24 * time.Hour)
-		client.(*MockClient).On("buildURL", "preauthkey").Return(&url.URL{Path: "http://example.com/api/v1/preauthkey"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/preauthkey"}, requestOptions{
-			body: CreatePreAuthKeyRequest{
-				User:       "test-user",
-				Reusable:   true,
-				Ephemeral:  false,
-				Expiration: expiration,
-				AclTags:    []string{"tag1", "tag2"},
-			},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
 
-		key, err := preAuthKeyResource.Create(context.Background(), "test-user", true, false, expiration, []string{"tag1", "tag2"})
-		assert.Error(t, err)
-		assert.Empty(t, key.PreAuthKey)
+		key, err := client.PreAuthKeys().Create(context.Background(), "test-user", true, false, time.Now().Add(24*time.Hour), []string{"tag1", "tag2"})
+		require.Error(t, err)
+		require.Empty(t, key.PreAuthKey)
 	})
 }
 
 func TestPreAuthKeyResource_Expire(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		client := NewMockClient()
-		preAuthKeyResource := &PreAuthKeyResource{Client: client}
-		client.(*MockClient).On("buildURL", "preauthkey", "expire").Return(&url.URL{Path: "http://example.com/api/v1/preauthkey/expire"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/preauthkey/expire"}, requestOptions{
-			body: ExpirePreAuthKeyRequest{
-				User: "test-user",
-				Key:  "test-key",
-			},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(nil)
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			if r.URL.Path != "/api/v1/preauthkey/expire" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			if r.Header.Get("Authorization") != ExpectedTestBearerToken {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-		err := preAuthKeyResource.Expire(context.Background(), "test-user", "test-key")
-		assert.NoError(t, err)
+			var req ExpirePreAuthKeyRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+		})
+
+		err := client.PreAuthKeys().Expire(context.Background(), "test-user", "test-key")
+		require.NoError(t, err)
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := NewMockClient()
-		preAuthKeyResource := &PreAuthKeyResource{Client: client}
-		client.(*MockClient).On("buildURL", "preauthkey", "expire").Return(&url.URL{Path: "http://example.com/api/v1/preauthkey/expire"})
-		client.(*MockClient).On("buildRequest", mock.Anything, http.MethodPost, &url.URL{Path: "http://example.com/api/v1/preauthkey/expire"}, requestOptions{
-			body: ExpirePreAuthKeyRequest{
-				User: "test-user",
-				Key:  "test-key",
-			},
-		}).Return(&http.Request{}, nil)
-		client.(*MockClient).On("do", mock.Anything, mock.Anything).Return(errors.New("request failed"))
+		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
 
-		err := preAuthKeyResource.Expire(context.Background(), "test-user", "test-key")
-		assert.Error(t, err)
+		err := client.PreAuthKeys().Expire(context.Background(), "test-user", "test-key")
+		require.Error(t, err)
 	})
 }
