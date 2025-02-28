@@ -18,7 +18,7 @@ jobs:
         with:
           go-version: "stable"
       - run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-      - uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+      - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
