@@ -22,7 +22,7 @@ repos:
         types: ["dockerfile"]
         entry: ghcr.io/hadolint/hadolint hadolint
   - repo: https://github.com/dnephin/pre-commit-golang
-    rev: v0.5.1
+    rev: fb24a639f7c938759fe56eeebbb7713b69d60494 # v0.5.1
     hooks:
       - id: go-mod-tidy
       - id: go-fmt
