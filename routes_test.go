@@ -44,7 +44,7 @@ func TestRoutesResource_List(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		})
 
@@ -78,7 +78,7 @@ func TestRoutesResource_Delete(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 		})
 
@@ -111,7 +111,7 @@ func TestRoutesResource_Enable(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		})
 
@@ -144,7 +144,7 @@ func TestRoutesResource_Disable(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		})
 

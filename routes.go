@@ -6,10 +6,12 @@ import (
 	"time"
 )
 
+// RoutesResource is a struct that provides methods to interact with the routes API of Headscale.
 type RoutesResource struct {
-	Client HeadscaleClientInterface
+	Client ClientInterface
 }
 
+// Route represents a route in Headscale.
 type Route struct {
 	ID         string       `json:"id"`
 	Node       NodeResponse `json:"node"`
@@ -22,10 +24,12 @@ type Route struct {
 	DeletedAt  time.Time    `json:"deletedAt"`
 }
 
+// RoutesResponse represents a single route response from the API.
 type RoutesResponse struct {
 	Routes []Route `json:"routes"`
 }
 
+// List returns a list of routes from the Headscale.
 func (r *RoutesResource) List(ctx context.Context) (RoutesResponse, error) {
 	var routes RoutesResponse
 
@@ -39,6 +43,7 @@ func (r *RoutesResource) List(ctx context.Context) (RoutesResponse, error) {
 	return routes, err
 }
 
+// Delete removes a route from the Headscale.
 func (r *RoutesResource) Delete(ctx context.Context, id string) error {
 	url := r.Client.buildURL("routes", id)
 	req, err := r.Client.buildRequest(ctx, http.MethodDelete, url, requestOptions{})
@@ -49,6 +54,7 @@ func (r *RoutesResource) Delete(ctx context.Context, id string) error {
 	return r.Client.do(ctx, req, nil)
 }
 
+// Disable disables a route in the Headscale.
 func (r *RoutesResource) Disable(ctx context.Context, id string) error {
 	url := r.Client.buildURL("routes", id, "disable")
 	req, err := r.Client.buildRequest(ctx, http.MethodPost, url, requestOptions{})
@@ -59,6 +65,7 @@ func (r *RoutesResource) Disable(ctx context.Context, id string) error {
 	return r.Client.do(ctx, req, nil)
 }
 
+// Enable enables a route in the Headscale.
 func (r *RoutesResource) Enable(ctx context.Context, id string) error {
 	url := r.Client.buildURL("routes", id, "enable")
 	req, err := r.Client.buildRequest(ctx, http.MethodPost, url, requestOptions{})

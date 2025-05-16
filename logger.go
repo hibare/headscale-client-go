@@ -6,13 +6,23 @@ import (
 	"os"
 )
 
+// LogLevel represents the level of logging.
 type LogLevel int
 
 const (
+	// LevelDebug is the debug log level.
 	LevelDebug LogLevel = iota
+
+	// LevelInfo is the info log level.
 	LevelInfo
+
+	// LevelWarn is the warn log level.
 	LevelWarn
+
+	// LevelError is the error log level.
 	LevelError
+
+	// LevelCritical is the critical log level.
 	LevelCritical
 )
 

@@ -44,7 +44,7 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		})
 
@@ -66,7 +66,7 @@ func TestPreAuthKeyResource_Create(t *testing.T) {
 				Ephemeral:  false,
 				CreatedAt:  fixedTime,
 				Expiration: fixedTime.Add(24 * time.Hour),
-				AclTags:    []string{"tag1", "tag2"},
+				ACLTags:    []string{"tag1", "tag2"},
 			}},
 		}
 
@@ -100,11 +100,18 @@ func TestPreAuthKeyResource_Create(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		})
 
-		key, err := client.PreAuthKeys().Create(context.Background(), "test-user", true, false, time.Now().Add(24*time.Hour), []string{"tag1", "tag2"})
+		key, err := client.PreAuthKeys().Create(
+			context.Background(),
+			"test-user",
+			true,
+			false,
+			time.Now().Add(24*time.Hour),
+			[]string{"tag1", "tag2"},
+		)
 		require.Error(t, err)
 		require.Empty(t, key.PreAuthKey)
 	})
@@ -140,7 +147,7 @@ func TestPreAuthKeyResource_Expire(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		})
 

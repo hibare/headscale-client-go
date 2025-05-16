@@ -6,10 +6,12 @@ import (
 	"time"
 )
 
+// PreAuthKeyResource is a resource for managing pre-auth keys in Headscale.
 type PreAuthKeyResource struct {
-	Client HeadscaleClientInterface
+	Client ClientInterface
 }
 
+// PreAuthKey represents a pre-auth key in Headscale.
 type PreAuthKey struct {
 	User       string    `json:"user"`
 	ID         string    `json:"id"`
@@ -19,13 +21,15 @@ type PreAuthKey struct {
 	Used       bool      `json:"used"`
 	Expiration time.Time `json:"expiration"`
 	CreatedAt  time.Time `json:"createdAt"`
-	AclTags    []string  `json:"aclTags"`
+	ACLTags    []string  `json:"aclTags"`
 }
 
+// PreAuthKeysResponse represents a list of pre-auth keys response from the API.
 type PreAuthKeysResponse struct {
 	PreAuthKeys []PreAuthKey `json:"preAuthKeys"`
 }
 
+// List returns a list of pre-auth keys from the Headscale.
 func (p *PreAuthKeyResource) List(ctx context.Context) (PreAuthKeysResponse, error) {
 	var keys PreAuthKeysResponse
 
@@ -39,19 +43,29 @@ func (p *PreAuthKeyResource) List(ctx context.Context) (PreAuthKeysResponse, err
 	return keys, err
 }
 
+// CreatePreAuthKeyRequest represents a request to create a pre-auth key.
 type CreatePreAuthKeyRequest struct {
 	User       string    `json:"user"`
 	Reusable   bool      `json:"reusable"`
 	Ephemeral  bool      `json:"ephemeral"`
 	Expiration time.Time `json:"expiration"`
-	AclTags    []string  `json:"aclTags"`
+	ACLTags    []string  `json:"aclTags"`
 }
 
+// PreAuthKeyResponse represents a single pre-auth key response from the API.
 type PreAuthKeyResponse struct {
 	PreAuthKey []PreAuthKey `json:"preAuthKey"`
 }
 
-func (p *PreAuthKeyResource) Create(ctx context.Context, user string, reusable bool, ephemeral bool, expiration time.Time, aclTags []string) (PreAuthKeyResponse, error) {
+// Create creates a new pre-auth key in Headscale.
+func (p *PreAuthKeyResource) Create(
+	ctx context.Context,
+	user string,
+	reusable bool,
+	ephemeral bool,
+	expiration time.Time,
+	aclTags []string,
+) (PreAuthKeyResponse, error) {
 	var key PreAuthKeyResponse
 
 	url := p.Client.buildURL("preauthkey")
@@ -61,7 +75,7 @@ func (p *PreAuthKeyResource) Create(ctx context.Context, user string, reusable b
 			Reusable:   reusable,
 			Ephemeral:  ephemeral,
 			Expiration: expiration,
-			AclTags:    aclTags,
+			ACLTags:    aclTags,
 		},
 	})
 	if err != nil {
@@ -72,11 +86,13 @@ func (p *PreAuthKeyResource) Create(ctx context.Context, user string, reusable b
 	return key, err
 }
 
+// ExpirePreAuthKeyRequest represents a request to expire a pre-auth key.
 type ExpirePreAuthKeyRequest struct {
 	User string `json:"user"`
 	Key  string `json:"key"`
 }
 
+// Expire expires a pre-auth key in Headscale.
 func (p *PreAuthKeyResource) Expire(ctx context.Context, user string, key string) error {
 	url := p.Client.buildURL("preauthkey", "expire")
 	req, err := p.Client.buildRequest(ctx, http.MethodPost, url, requestOptions{
