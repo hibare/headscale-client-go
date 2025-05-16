@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "aaron-bond.better-comments",
+    "streetsidesoftware.code-spell-checker",
+    "editorconfig.editorconfig",
+    "golang.go",
+    "ms-vscode.makefile-tools",
+    "redhat.vscode-yaml"
+  ]
+}
