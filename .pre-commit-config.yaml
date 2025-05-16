@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # v5.0.0
     hooks:
       - id: check-added-large-files
       - id: check-json
@@ -12,8 +12,17 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
       - id: check-shebang-scripts-are-executable
+  - repo: https://github.com/hadolint/hadolint
+    rev: b3555ba9c2bfd9401e79f2f0da68dd1ae38e10c7 # v2.12.0
+    hooks:
+      - id: hadolint-docker
+        name: Lint Dockerfiles
+        description: Runs hadolint Docker image to lint Dockerfiles
+        language: docker_image
+        types: ["dockerfile"]
+        entry: ghcr.io/hadolint/hadolint hadolint
   - repo: https://github.com/dnephin/pre-commit-golang
-    rev: v0.5.1
+    rev: fb24a639f7c938759fe56eeebbb7713b69d60494 # v0.5.1
     hooks:
       - id: go-mod-tidy
       - id: go-fmt
@@ -24,6 +33,7 @@ repos:
     hooks:
       - id: run-go-tests
         name: Run Go Tests
-        entry: go test -v ./... -cover
+        entry: make test
         language: system
         types: [go]
+        verbose: false

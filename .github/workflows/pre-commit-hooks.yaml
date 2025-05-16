@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version: "stable"
-      - run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/2b224c2cf4c9f261c22a16af7f8ca6408467f338/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.0.2
       - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ~/.cache/pre-commit

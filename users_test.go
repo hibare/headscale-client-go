@@ -44,7 +44,7 @@ func TestUserResource_List(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		})
 
@@ -86,7 +86,7 @@ func TestUserResource_Get(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 		})
 
@@ -138,7 +138,7 @@ func TestUserResource_Create(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		})
 
@@ -172,7 +172,7 @@ func TestUserResource_Delete(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 		})
 
@@ -205,7 +205,7 @@ func TestUserResource_Rename(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		})
 

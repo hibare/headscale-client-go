@@ -44,7 +44,7 @@ func TestAPIKeyResource_List(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		})
 
@@ -97,7 +97,7 @@ func TestAPIKeyResource_Create(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		})
 
@@ -141,7 +141,7 @@ func TestAPIKeyResource_Expire(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		})
 
@@ -174,7 +174,7 @@ func TestAPIKeyResource_Delete(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 		})
 

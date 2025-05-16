@@ -5,19 +5,23 @@ import (
 	"net/http"
 )
 
+// PolicyResource is a resource for managing policies in Headscale.
 type PolicyResource struct {
-	Client HeadscaleClientInterface
+	Client ClientInterface
 }
 
+// Policy represents a policy in Headscale.
 type Policy struct {
 	Policy    string `json:"policy"`
 	UpdatedAt string `json:"updated_at"`
 }
 
+// UpdatePolicyRequest represents a request to update the policy.
 type UpdatePolicyRequest struct {
 	Policy string `json:"policy"`
 }
 
+// Get retrieves the current policy from Headscale.
 func (p *PolicyResource) Get(ctx context.Context) (Policy, error) {
 	var policy Policy
 
@@ -31,6 +35,7 @@ func (p *PolicyResource) Get(ctx context.Context) (Policy, error) {
 	return policy, err
 }
 
+// Put updates the policy in Headscale.
 func (p *PolicyResource) Put(ctx context.Context, policy string) error {
 	url := p.Client.buildURL("policy")
 	req, err := p.Client.buildRequest(ctx, http.MethodPut, url, requestOptions{

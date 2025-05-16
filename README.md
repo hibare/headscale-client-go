@@ -5,6 +5,9 @@
 
 A client implementation for the [Headscale](https://headscale.net) HTTP API.
 
+> [!CAUTION]
+> This project is currently under active development and may not yet be stable. If you encounter any issues, please open an issue report
+
 ## Example (Using API Key)
 
 ```go

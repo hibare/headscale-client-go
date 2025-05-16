@@ -4,17 +4,26 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"time"
 )
 
-const DefaultUserAgent = "headscale-client-go"
-const DefaultHTTPClientTimeout = time.Minute
-const basePath = "/api/v1"
+const (
+	// DefaultUserAgent is the default user agent for the Headscale client.
+	DefaultUserAgent = "headscale-client-go"
 
-type HeadscaleClientInterface interface {
+	// DefaultHTTPClientTimeout is the default timeout for HTTP requests.
+	DefaultHTTPClientTimeout = time.Minute
+
+	// basePath is the base path for the Headscale API.
+	basePath = "/api/v1"
+)
+
+// ClientInterface defines the methods that a Headscale client must implement.
+type ClientInterface interface {
 	APIKeys() *APIKeyResource
 	Nodes() *NodeResource
 	Policy() *PolicyResource
@@ -26,6 +35,7 @@ type HeadscaleClientInterface interface {
 	do(ctx context.Context, req *http.Request, v interface{}) error
 }
 
+// Client is a struct that implements the HeadscaleClientInterface.
 type Client struct {
 	BaseURL   *url.URL
 	UserAgent string
@@ -42,26 +52,32 @@ type Client struct {
 	preAuthKeys *PreAuthKeyResource
 }
 
+// APIKeys returns the APIKeyResource for managing API keys.
 func (c *Client) APIKeys() *APIKeyResource {
 	return c.apiKeys
 }
 
+// Nodes returns the NodeResource for managing nodes.
 func (c *Client) Nodes() *NodeResource {
 	return c.nodes
 }
 
+// Policy returns the PolicyResource for managing policies.
 func (c *Client) Policy() *PolicyResource {
 	return c.policy
 }
 
+// Users returns the UserResource for managing users.
 func (c *Client) Users() *UserResource {
 	return c.users
 }
 
+// Routes returns the RoutesResource for managing routes.
 func (c *Client) Routes() *RoutesResource {
 	return c.routes
 }
 
+// PreAuthKeys returns the PreAuthKeyResource for managing pre-auth keys.
 func (c *Client) PreAuthKeys() *PreAuthKeyResource {
 	return c.preAuthKeys
 }
@@ -133,7 +149,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) error
 		return err
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
@@ -149,24 +165,22 @@ func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) error
 	return nil
 }
 
-type ChangesResponse struct {
-	Changes []string `json:"changes"`
+// ClientOptions contains options for the Headscale client.
+type ClientOptions struct {
+	HTTPClient *http.Client
+	UserAgent  string
+	Logger     Logger
 }
 
-type HeadscaleClientOptions struct {
-	Http      *http.Client
-	UserAgent string
-	Logger    Logger
-}
-
-func NewClient(baseURL, apiKey string, opt HeadscaleClientOptions) (HeadscaleClientInterface, error) {
+// NewClient creates a new Headscale client with the specified base URL and API key.
+func NewClient(baseURL, apiKey string, opt ClientOptions) (ClientInterface, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		return nil, err
 	}
 
 	if apiKey == "" {
-		return nil, fmt.Errorf("API key is required")
+		return nil, errors.New("API key is required")
 	}
 
 	c := &Client{
@@ -177,8 +191,8 @@ func NewClient(baseURL, apiKey string, opt HeadscaleClientOptions) (HeadscaleCli
 		Logger:    NewDefaultLogger(LevelDebug),
 	}
 
-	if opt.Http != nil {
-		c.HTTP = opt.Http
+	if opt.HTTPClient != nil {
+		c.HTTP = opt.HTTPClient
 	}
 
 	if opt.UserAgent != "" {

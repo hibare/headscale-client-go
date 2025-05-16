@@ -40,7 +40,7 @@ func TestPolicyResource_Get(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		})
 
@@ -84,7 +84,7 @@ func TestPolicyResource_Put(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		client := setupTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		client := setupTestServer(t, func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		})
 
