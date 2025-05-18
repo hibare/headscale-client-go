@@ -1,4 +1,5 @@
-package headscale
+// Package logger provides a logger for the Headscale client.
+package logger
 
 import (
 	"context"
