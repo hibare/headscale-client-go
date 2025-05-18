@@ -1,7 +1,6 @@
 package policy
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"net/url"
@@ -17,7 +16,7 @@ func TestPolicyResource_Get(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PolicyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 		fakeResp := Policy{Policy: "test-policy", UpdatedAt: "2024-01-01T00:00:00Z"}
@@ -38,7 +37,7 @@ func TestPolicyResource_Get(t *testing.T) {
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PolicyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
@@ -54,7 +53,7 @@ func TestPolicyResource_Get(t *testing.T) {
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PolicyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
@@ -73,7 +72,7 @@ func TestPolicyResource_Update(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PolicyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		policyStr := "new-policy"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -98,7 +97,7 @@ func TestPolicyResource_Update(t *testing.T) {
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PolicyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		policyStr := "new-policy"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -115,7 +114,7 @@ func TestPolicyResource_Update(t *testing.T) {
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PolicyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		policyStr := "new-policy"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}

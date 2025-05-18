@@ -1,7 +1,6 @@
 package apikeys
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"net/url"
@@ -18,7 +17,7 @@ func TestAPIKeyResource_List(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		a := &APIKeyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 		fakeResp := APIKeysResponse{APIKeys: []APIKey{{ID: "1", Prefix: "prefix1"}}}
@@ -39,7 +38,7 @@ func TestAPIKeyResource_List(t *testing.T) {
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		a := &APIKeyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
@@ -55,7 +54,7 @@ func TestAPIKeyResource_List(t *testing.T) {
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		a := &APIKeyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
@@ -74,7 +73,7 @@ func TestAPIKeyResource_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		a := &APIKeyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		expiration := time.Now().Add(24 * time.Hour)
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -96,7 +95,7 @@ func TestAPIKeyResource_Create(t *testing.T) {
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		a := &APIKeyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		expiration := time.Now().Add(24 * time.Hour)
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -113,7 +112,7 @@ func TestAPIKeyResource_Create(t *testing.T) {
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		a := &APIKeyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		expiration := time.Now().Add(24 * time.Hour)
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -133,7 +132,7 @@ func TestAPIKeyResource_Expire(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		a := &APIKeyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		prefix := "prefix1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -150,7 +149,7 @@ func TestAPIKeyResource_Expire(t *testing.T) {
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		a := &APIKeyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		prefix := "prefix1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -166,7 +165,7 @@ func TestAPIKeyResource_Expire(t *testing.T) {
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		a := &APIKeyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		prefix := "prefix1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -185,7 +184,7 @@ func TestAPIKeyResource_Delete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		a := &APIKeyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		prefix := "prefix1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -202,7 +201,7 @@ func TestAPIKeyResource_Delete(t *testing.T) {
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		a := &APIKeyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		prefix := "prefix1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -218,7 +217,7 @@ func TestAPIKeyResource_Delete(t *testing.T) {
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		a := &APIKeyResource{r: mockReq}
-		ctx := context.Background()
+		ctx := t.Context()
 		prefix := "prefix1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}

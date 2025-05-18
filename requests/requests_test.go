@@ -1,7 +1,6 @@
 package requests
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -53,7 +52,7 @@ func TestBuildRequest(t *testing.T) {
 		ContentType: "application/json",
 		QueryParams: map[string]interface{}{"q": "search"},
 	}
-	req, err := r.BuildRequest(context.Background(), http.MethodPost, uri, opt)
+	req, err := r.BuildRequest(t.Context(), http.MethodPost, uri, opt)
 	require.NoError(t, err)
 	require.Equal(t, "application/json", req.Header.Get("Content-Type"))
 	require.Equal(t, DefaultUserAgent, req.Header.Get("User-Agent"))
@@ -89,10 +88,10 @@ func TestDo_Success(t *testing.T) {
 	}
 
 	uri := r.BuildURL("foo")
-	req, err := r.BuildRequest(context.Background(), http.MethodGet, uri, RequestOptions{})
+	req, err := r.BuildRequest(t.Context(), http.MethodGet, uri, RequestOptions{})
 	require.NoError(t, err)
 	var resp struct{ Foo string }
-	err = r.Do(context.Background(), req, &resp)
+	err = r.Do(t.Context(), req, &resp)
 	require.NoError(t, err)
 	require.True(t, called)
 	require.Equal(t, "bar", resp.Foo)
@@ -117,9 +116,9 @@ func TestDo_ErrorStatus(t *testing.T) {
 	}
 
 	uri := r.BuildURL("foo")
-	req, err := r.BuildRequest(context.Background(), http.MethodGet, uri, RequestOptions{})
+	req, err := r.BuildRequest(t.Context(), http.MethodGet, uri, RequestOptions{})
 	require.NoError(t, err)
-	err = r.Do(context.Background(), req, nil)
+	err = r.Do(t.Context(), req, nil)
 	require.Error(t, err)
 }
 
@@ -135,7 +134,7 @@ func TestBuildRequest_InvalidURL(t *testing.T) {
 		logger:     logger.NewDefaultLogger(logger.LevelError),
 		httpClient: &http.Client{},
 	}
-	_, err = r.BuildRequest(context.Background(), http.MethodGet, nil, RequestOptions{})
+	_, err = r.BuildRequest(t.Context(), http.MethodGet, nil, RequestOptions{})
 	require.Error(t, err)
 }
 
@@ -155,6 +154,6 @@ func TestBuildRequest_InvalidBody(t *testing.T) {
 	opt := RequestOptions{
 		Body: make(chan int), // not JSON serializable
 	}
-	_, err = r.BuildRequest(context.Background(), http.MethodPost, uri, opt)
+	_, err = r.BuildRequest(t.Context(), http.MethodPost, uri, opt)
 	require.Error(t, err)
 }
