@@ -18,8 +18,8 @@ func (m *MockUserResource) List(ctx context.Context, filter UserListFilter) (Use
 }
 
 // Create creates a mock user from the Headscale.
-func (m *MockUserResource) Create(ctx context.Context, name string) (UserResponse, error) {
-	args := m.Called(ctx, name)
+func (m *MockUserResource) Create(ctx context.Context, request CreateUserRequest) (UserResponse, error) {
+	args := m.Called(ctx, request)
 	return args.Get(0).(UserResponse), args.Error(1) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
 }
 

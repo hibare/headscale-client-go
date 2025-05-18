@@ -12,7 +12,7 @@ import (
 // UserResourceInterface is an interface for managing users in Headscale.
 type UserResourceInterface interface {
 	List(ctx context.Context, filter UserListFilter) (UsersResponse, error)
-	Create(ctx context.Context, name string) (UserResponse, error)
+	Create(ctx context.Context, request CreateUserRequest) (UserResponse, error)
 	Delete(ctx context.Context, id string) error
 	Rename(ctx context.Context, id, newName string) (UserResponse, error)
 }
@@ -33,7 +33,7 @@ type User struct {
 //
 //nolint:revive // This is a struct for a response from the API.
 type UsersResponse struct {
-	Users []User `json:"user"`
+	Users []User `json:"users"`
 }
 
 // UserListFilter represents a filter for a list of users.
@@ -85,14 +85,12 @@ type CreateUserRequest struct {
 }
 
 // Create creates a new user in Headscale.
-func (u *UserResource) Create(ctx context.Context, name string) (UserResponse, error) {
+func (u *UserResource) Create(ctx context.Context, createUserRequest CreateUserRequest) (UserResponse, error) {
 	var user UserResponse
 
 	url := u.r.BuildURL("user")
 	req, err := u.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
-		Body: CreateUserRequest{
-			Name: name,
-		},
+		Body: createUserRequest,
 	})
 	if err != nil {
 		return user, err

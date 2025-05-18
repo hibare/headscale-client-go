@@ -88,7 +88,12 @@ func TestUserResource_Create(t *testing.T) {
 			*resp = fakeResp
 		}).Return(nil)
 
-		resp, err := u.Create(ctx, name)
+		resp, err := u.Create(ctx, CreateUserRequest{
+			Name:        name,
+			DisplayName: name,
+			Email:       name + "@example.com",
+			PictureURL:  "https://example.com/picture.png",
+		})
 		require.NoError(t, err)
 		assert.Equal(t, fakeResp, resp)
 		mockReq.AssertExpectations(t)
@@ -105,7 +110,12 @@ func TestUserResource_Create(t *testing.T) {
 		mockReq.On("BuildURL", "user").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
 
-		resp, err := u.Create(ctx, name)
+		resp, err := u.Create(ctx, CreateUserRequest{
+			Name:        name,
+			DisplayName: name,
+			Email:       name + "@example.com",
+			PictureURL:  "https://example.com/picture.png",
+		})
 		require.Error(t, err)
 		assert.Empty(t, resp.User)
 		mockReq.AssertExpectations(t)
@@ -123,7 +133,12 @@ func TestUserResource_Create(t *testing.T) {
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
 		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*users.UserResponse")).Return(errors.New("do error"))
 
-		resp, err := u.Create(ctx, name)
+		resp, err := u.Create(ctx, CreateUserRequest{
+			Name:        name,
+			DisplayName: name,
+			Email:       name + "@example.com",
+			PictureURL:  "https://example.com/picture.png",
+		})
 		require.Error(t, err)
 		assert.Empty(t, resp.User)
 		mockReq.AssertExpectations(t)
