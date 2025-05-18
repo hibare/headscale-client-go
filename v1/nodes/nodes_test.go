@@ -142,7 +142,7 @@ func TestNodeResource_Register(t *testing.T) {
 		fakeReq := &http.Request{}
 		fakeResp := NodeResponse{Node: Node{ID: "1", Name: "testnode"}}
 
-		mockReq.On("BuildURL", "node").Return(fakeURL)
+		mockReq.On("BuildURL", "node", "register").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
 		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*nodes.NodeResponse")).Run(func(args mock.Arguments) {
 			resp := args.Get(2).(*NodeResponse) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
@@ -164,7 +164,7 @@ func TestNodeResource_Register(t *testing.T) {
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
-		mockReq.On("BuildURL", "node").Return(fakeURL)
+		mockReq.On("BuildURL", "node", "register").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
 
 		resp, err := n.Register(ctx, user, key)
@@ -182,7 +182,7 @@ func TestNodeResource_Register(t *testing.T) {
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
-		mockReq.On("BuildURL", "node").Return(fakeURL)
+		mockReq.On("BuildURL", "node", "register").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
 		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*nodes.NodeResponse")).Return(errors.New("do error"))
 

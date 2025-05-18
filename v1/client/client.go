@@ -8,6 +8,7 @@ import (
 
 	"github.com/hibare/headscale-client-go/logger"
 	"github.com/hibare/headscale-client-go/requests"
+	"github.com/hibare/headscale-client-go/utils"
 	"github.com/hibare/headscale-client-go/v1/apikeys"
 	"github.com/hibare/headscale-client-go/v1/nodes"
 	"github.com/hibare/headscale-client-go/v1/policy"
@@ -73,6 +74,7 @@ type ClientOptions struct {
 	HTTPClient *http.Client
 	UserAgent  *string
 	Logger     logger.Logger
+	LogLevel   *logger.LogLevel
 }
 
 // NewClient creates a new Headscale client with the specified base URL and API key.
@@ -100,7 +102,11 @@ func NewClient(baseURL, apiKey string, opt ClientOptions) (ClientInterface, erro
 	}
 
 	if opt.Logger == nil {
-		opt.Logger = logger.NewDefaultLogger(logger.LevelInfo)
+		// only set the log level if the logger is not provided otherwise provider will set it.
+		if opt.LogLevel == nil {
+			opt.LogLevel = utils.ToPtr(logger.LevelInfo)
+		}
+		opt.Logger = logger.NewDefaultLogger(*opt.LogLevel)
 	}
 
 	// Create a new request with the given base URL, API key, and options

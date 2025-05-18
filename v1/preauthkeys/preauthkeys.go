@@ -3,11 +3,17 @@ package preauthkeys
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/hibare/headscale-client-go/requests"
 	"github.com/hibare/headscale-client-go/v1/users"
+)
+
+var (
+	// ErrNoUser is returned when a user is required but not provided.
+	ErrNoUser = errors.New("user is required")
 )
 
 // PreAuthKeyResourceInterface is an interface for managing pre-auth keys in Headscale.
@@ -39,7 +45,7 @@ type PreAuthKeysResponse struct {
 
 // PreAuthKeyListFilter represents a filter for listing pre-auth keys.
 type PreAuthKeyListFilter struct {
-	User string `json:"user"`
+	User int `json:"user"`
 }
 
 // List returns a list of pre-auth keys from the Headscale.
@@ -47,10 +53,11 @@ func (p *PreAuthKeyResource) List(ctx context.Context, filter PreAuthKeyListFilt
 	var keys PreAuthKeysResponse
 
 	queryParams := map[string]any{}
-	if filter.User != "" {
-		queryParams["user"] = filter.User
+	if filter.User == 0 {
+		return keys, ErrNoUser
 	}
 
+	queryParams["user"] = filter.User
 	url := p.r.BuildURL("preauthkey")
 	req, err := p.r.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{
 		QueryParams: queryParams,
@@ -74,7 +81,7 @@ type CreatePreAuthKeyRequest struct {
 
 // PreAuthKeyResponse represents a single pre-auth key response from the API.
 type PreAuthKeyResponse struct {
-	PreAuthKey []PreAuthKey `json:"preAuthKey"`
+	PreAuthKey PreAuthKey `json:"preAuthKey"`
 }
 
 // Create creates a new pre-auth key in Headscale.

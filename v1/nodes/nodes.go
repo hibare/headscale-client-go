@@ -26,26 +26,26 @@ type NodeResourceInterface interface {
 
 // Node represents a node in Headscale.
 type Node struct {
-	ID              string                 `json:"id"`
-	MachineKey      string                 `json:"machineKey"`
-	NodeKey         string                 `json:"nodeKey"`
-	DiscoKey        string                 `json:"discoKey"`
-	IPAddresses     []string               `json:"ipAddresses"`
-	Name            string                 `json:"name"`
-	User            users.User             `json:"user"`
-	LastSeen        time.Time              `json:"lastSeen"`
-	Expiry          time.Time              `json:"expiry"`
-	PreAuthKey      preauthkeys.PreAuthKey `json:"preAuthKey"`
-	CreatedAt       time.Time              `json:"createdAt"`
-	RegisterMethod  string                 `json:"registerMethod"`
-	ForcedTags      []string               `json:"forcedTags"`
-	InvalidTags     []string               `json:"invalidTags"`
-	ValidTags       []string               `json:"validTags"`
-	GivenName       string                 `json:"givenName"`
-	Online          bool                   `json:"online"`
-	ApprovedRoutes  []string               `json:"approvedRoutes"`
-	AvailableRoutes []string               `json:"availableRoutes"`
-	SubnetRoutes    []string               `json:"subnetRoutes"`
+	ID              string                  `json:"id"`
+	MachineKey      string                  `json:"machineKey"`
+	NodeKey         string                  `json:"nodeKey"`
+	DiscoKey        string                  `json:"discoKey"`
+	IPAddresses     []string                `json:"ipAddresses"`
+	Name            string                  `json:"name"`
+	User            users.User              `json:"user"`
+	LastSeen        time.Time               `json:"lastSeen"`
+	Expiry          time.Time               `json:"expiry"`
+	PreAuthKey      *preauthkeys.PreAuthKey `json:"preAuthKey"`
+	CreatedAt       time.Time               `json:"createdAt"`
+	RegisterMethod  string                  `json:"registerMethod"`
+	ForcedTags      []string                `json:"forcedTags"`
+	InvalidTags     []string                `json:"invalidTags"`
+	ValidTags       []string                `json:"validTags"`
+	GivenName       string                  `json:"givenName"`
+	Online          bool                    `json:"online"`
+	ApprovedRoutes  []string                `json:"approvedRoutes"`
+	AvailableRoutes []string                `json:"availableRoutes"`
+	SubnetRoutes    []string                `json:"subnetRoutes"`
 }
 
 // NodeResponse represents a single node response from the API.
@@ -104,7 +104,7 @@ func (n *NodeResource) Get(ctx context.Context, id string) (NodeResponse, error)
 func (n *NodeResource) Register(ctx context.Context, user, key string) (NodeResponse, error) {
 	var node NodeResponse
 
-	url := n.r.BuildURL("node")
+	url := n.r.BuildURL("node", "register")
 	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		QueryParams: map[string]interface{}{
 			"user": user,

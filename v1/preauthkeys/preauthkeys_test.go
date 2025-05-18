@@ -19,7 +19,7 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PreAuthKeyResource{r: mockReq}
 		ctx := t.Context()
-		filter := PreAuthKeyListFilter{User: "testuser"}
+		filter := PreAuthKeyListFilter{User: 1}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 		fakeResp := PreAuthKeysResponse{PreAuthKeys: []PreAuthKey{{ID: "1", User: users.User{ID: "u1", Name: "testuser"}}}}
@@ -37,11 +37,22 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 		mockReq.AssertExpectations(t)
 	})
 
-	t.Run("build request error", func(t *testing.T) {
+	t.Run("no user", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PreAuthKeyResource{r: mockReq}
 		ctx := t.Context()
 		filter := PreAuthKeyListFilter{}
+		resp, err := p.List(ctx, filter)
+		require.Error(t, err)
+		assert.Empty(t, resp.PreAuthKeys)
+		mockReq.AssertExpectations(t)
+	})
+
+	t.Run("build request error", func(t *testing.T) {
+		mockReq := new(requests.MockRequest)
+		p := &PreAuthKeyResource{r: mockReq}
+		ctx := t.Context()
+		filter := PreAuthKeyListFilter{User: 1}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
@@ -58,7 +69,7 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PreAuthKeyResource{r: mockReq}
 		ctx := t.Context()
-		filter := PreAuthKeyListFilter{}
+		filter := PreAuthKeyListFilter{User: 1}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
@@ -87,7 +98,9 @@ func TestPreAuthKeyResource_Create(t *testing.T) {
 		}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
-		fakeResp := PreAuthKeyResponse{PreAuthKey: []PreAuthKey{{ID: "1", User: users.User{ID: "u1", Name: "testuser"}}}}
+		fakeResp := PreAuthKeyResponse{
+			PreAuthKey: PreAuthKey{ID: "1", User: users.User{ID: "u1", Name: "testuser"}},
+		}
 
 		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)

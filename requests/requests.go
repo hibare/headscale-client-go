@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -114,7 +115,7 @@ func (r *Request) BuildRequest(ctx context.Context, method string, uri *url.URL,
 
 // Do executes the HTTP request and decodes the response into v if provided.
 func (r *Request) Do(ctx context.Context, req *http.Request, v interface{}) error {
-	r.logger.Info(ctx, "Request: ", "method", req.Method, "url", req.URL.String())
+	r.logger.Debug(ctx, "Request: ", "method", req.Method, "url", req.URL.String())
 	resp, err := r.httpClient.Do(req)
 	if err != nil {
 		return err
@@ -123,7 +124,11 @@ func (r *Request) Do(ctx context.Context, req *http.Request, v interface{}) erro
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		r.logger.Error(ctx, "Response: ", "status", resp.StatusCode, "body", resp.Body)
+		// Read response body for logging
+		respBody, rErr := io.ReadAll(resp.Body)
+		if rErr == nil {
+			r.logger.Error(ctx, "Response: ", "status", resp.StatusCode, "body", string(respBody))
+		}
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
