@@ -3,12 +3,38 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/tailscale/tailscale-client-go/v2.svg)](https://pkg.go.dev/github.com/hibare/headscale-client-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hibare/headscale-client-go)](https://goreportcard.com/report/github.com/hibare/headscale-client-go)
 
-A client implementation for the [Headscale](https://headscale.net) HTTP API.
+A Go client for the [Headscale](https://headscale.net) HTTP API.
 
-> [!CAUTION]
-> This project is currently under active development and may not yet be stable. If you encounter any issues, please open an issue report
+> **CAUTION**
+> This project is under active development and may not yet be stable. If you encounter any issues, please open an issue report.
 
-## Example (Using API Key)
+---
+
+## Features
+
+- Manage **API Keys**: List, create, expire, and delete API keys.
+- Manage **Nodes**: List, get, register, delete, expire, rename, tag, update user, and backfill IPs for nodes.
+- Manage **Users**: List, create, delete, and rename users.
+- Manage **Policies**: Get and update policy documents.
+- Manage **Pre-Auth Keys**: List, create, and expire pre-auth keys.
+- Customizable HTTP client, user agent, and logger support.
+- Idiomatic Go API with context support.
+
+---
+
+## Installation
+
+Requires **Go 1.23+**
+
+```sh
+go get github.com/hibare/headscale-client-go
+```
+
+---
+
+## Usage
+
+### Example (Using API Key)
 
 ```go
 package main
@@ -41,7 +67,56 @@ func main() {
 	for _, node := range nodes.Nodes {
 		fmt.Printf("Node: %s\n", node.Name)
 	}
-
 }
-
 ```
+
+### API Overview
+
+The client exposes resource interfaces for each Headscale API resource:
+
+- `client.APIKeys()` – Manage API keys
+- `client.Nodes()` – Manage nodes
+- `client.Users()` – Manage users
+- `client.Policy()` – Manage policy
+- `client.PreAuthKeys()` – Manage pre-auth keys
+
+Each resource provides methods for CRUD and management operations. See [pkg.go.dev](https://pkg.go.dev/github.com/hibare/headscale-client-go) for full API documentation.
+
+---
+
+## Development & Contributing
+
+- **Run tests:**
+  ```sh
+  make test
+  ```
+- **Lint:**
+  ```sh
+  make install-golangci-lint
+  golangci-lint run
+  ```
+- **Pre-commit hooks:**
+  ```sh
+  make install-pre-commit
+  pre-commit run --all-files
+  ```
+- **Formatting:**
+  ```sh
+  go fmt ./...
+  ```
+
+Contributions are welcome! Please open issues or pull requests.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+## Links
+
+- [Headscale](https://headscale.net)
+- [pkg.go.dev Documentation](https://pkg.go.dev/github.com/hibare/headscale-client-go)
+- [GitHub Issues](https://github.com/hibare/headscale-client-go/issues)

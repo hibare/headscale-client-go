@@ -89,6 +89,8 @@ func NewClient(baseURL, apiKey string, opt ClientOptions) (ClientInterface, erro
 	// Set default values if not provided
 	if opt.HTTPClient == nil {
 		opt.HTTPClient = &http.Client{Timeout: requests.DefaultHTTPClientTimeout}
+	} else if opt.HTTPClient.Timeout == 0 {
+		opt.HTTPClient.Timeout = requests.DefaultHTTPClientTimeout
 	}
 
 	if opt.UserAgent == nil {
