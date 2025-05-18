@@ -2,7 +2,6 @@ package preauthkeys
 
 import (
 	"context"
-	"time"
 
 	"github.com/stretchr/testify/mock"
 )
@@ -19,15 +18,8 @@ func (m *MockPreAuthKeyResource) List(ctx context.Context, filter PreAuthKeyList
 }
 
 // Create creates a mock pre-auth key from the Headscale.
-func (m *MockPreAuthKeyResource) Create(
-	ctx context.Context,
-	user string,
-	reusable bool,
-	ephemeral bool,
-	expiration time.Time,
-	aclTags []string,
-) (PreAuthKeyResponse, error) {
-	args := m.Called(ctx, user, reusable, ephemeral, expiration, aclTags)
+func (m *MockPreAuthKeyResource) Create(ctx context.Context, createPreAuthKeyRequest CreatePreAuthKeyRequest) (PreAuthKeyResponse, error) {
+	args := m.Called(ctx, createPreAuthKeyRequest)
 	return args.Get(0).(PreAuthKeyResponse), args.Error(1) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
 }
 

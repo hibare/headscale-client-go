@@ -13,7 +13,7 @@ import (
 // PreAuthKeyResourceInterface is an interface for managing pre-auth keys in Headscale.
 type PreAuthKeyResourceInterface interface {
 	List(ctx context.Context, filter PreAuthKeyListFilter) (PreAuthKeysResponse, error)
-	Create(ctx context.Context, user string, reusable bool, ephemeral bool, expiration time.Time, aclTags []string) (PreAuthKeyResponse, error)
+	Create(ctx context.Context, createPreAuthKeyRequest CreatePreAuthKeyRequest) (PreAuthKeyResponse, error)
 	Expire(ctx context.Context, user string, key string) error
 }
 
@@ -78,25 +78,12 @@ type PreAuthKeyResponse struct {
 }
 
 // Create creates a new pre-auth key in Headscale.
-func (p *PreAuthKeyResource) Create(
-	ctx context.Context,
-	user string,
-	reusable bool,
-	ephemeral bool,
-	expiration time.Time,
-	aclTags []string,
-) (PreAuthKeyResponse, error) {
+func (p *PreAuthKeyResource) Create(ctx context.Context, createPreAuthKeyRequest CreatePreAuthKeyRequest) (PreAuthKeyResponse, error) {
 	var key PreAuthKeyResponse
 
 	url := p.r.BuildURL("preauthkey")
 	req, err := p.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
-		Body: CreatePreAuthKeyRequest{
-			User:       user,
-			Reusable:   reusable,
-			Ephemeral:  ephemeral,
-			Expiration: expiration,
-			ACLTags:    aclTags,
-		},
+		Body: createPreAuthKeyRequest,
 	})
 	if err != nil {
 		return key, err

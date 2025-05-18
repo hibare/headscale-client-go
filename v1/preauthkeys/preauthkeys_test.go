@@ -78,14 +78,16 @@ func TestPreAuthKeyResource_Create(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PreAuthKeyResource{r: mockReq}
 		ctx := t.Context()
-		user := "testuser"
-		reusable := true
-		ephemeral := false
-		expiration := time.Now().Add(24 * time.Hour)
-		aclTags := []string{"tag:test"}
+		request := CreatePreAuthKeyRequest{
+			User:       "testuser",
+			Reusable:   true,
+			Ephemeral:  false,
+			Expiration: time.Now().Add(24 * time.Hour),
+			ACLTags:    []string{"tag:test"},
+		}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
-		fakeResp := PreAuthKeyResponse{PreAuthKey: []PreAuthKey{{ID: "1", User: users.User{ID: "u1", Name: user}}}}
+		fakeResp := PreAuthKeyResponse{PreAuthKey: []PreAuthKey{{ID: "1", User: users.User{ID: "u1", Name: "testuser"}}}}
 
 		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
@@ -94,7 +96,7 @@ func TestPreAuthKeyResource_Create(t *testing.T) {
 			*resp = fakeResp
 		}).Return(nil)
 
-		resp, err := p.Create(ctx, user, reusable, ephemeral, expiration, aclTags)
+		resp, err := p.Create(ctx, request)
 		require.NoError(t, err)
 		assert.Equal(t, fakeResp, resp)
 		mockReq.AssertExpectations(t)
@@ -104,18 +106,20 @@ func TestPreAuthKeyResource_Create(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PreAuthKeyResource{r: mockReq}
 		ctx := t.Context()
-		user := "testuser"
-		reusable := true
-		ephemeral := false
-		expiration := time.Now().Add(24 * time.Hour)
-		aclTags := []string{"tag:test"}
+		request := CreatePreAuthKeyRequest{
+			User:       "testuser",
+			Reusable:   true,
+			Ephemeral:  false,
+			Expiration: time.Now().Add(24 * time.Hour),
+			ACLTags:    []string{"tag:test"},
+		}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
 		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
 
-		resp, err := p.Create(ctx, user, reusable, ephemeral, expiration, aclTags)
+		resp, err := p.Create(ctx, request)
 		require.Error(t, err)
 		assert.Empty(t, resp.PreAuthKey)
 		mockReq.AssertExpectations(t)
@@ -125,11 +129,13 @@ func TestPreAuthKeyResource_Create(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PreAuthKeyResource{r: mockReq}
 		ctx := t.Context()
-		user := "testuser"
-		reusable := true
-		ephemeral := false
-		expiration := time.Now().Add(24 * time.Hour)
-		aclTags := []string{"tag:test"}
+		request := CreatePreAuthKeyRequest{
+			User:       "testuser",
+			Reusable:   true,
+			Ephemeral:  false,
+			Expiration: time.Now().Add(24 * time.Hour),
+			ACLTags:    []string{"tag:test"},
+		}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
@@ -137,7 +143,7 @@ func TestPreAuthKeyResource_Create(t *testing.T) {
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
 		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*preauthkeys.PreAuthKeyResponse")).Return(errors.New("do error"))
 
-		resp, err := p.Create(ctx, user, reusable, ephemeral, expiration, aclTags)
+		resp, err := p.Create(ctx, request)
 		require.Error(t, err)
 		assert.Empty(t, resp.PreAuthKey)
 		mockReq.AssertExpectations(t)
