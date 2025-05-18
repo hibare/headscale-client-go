@@ -24,7 +24,7 @@ A Go client for the [Headscale](https://headscale.net) HTTP API.
 
 ## Installation
 
-Requires **Go 1.23+**
+Requires **Go 1.24+**
 
 ```sh
 go get github.com/hibare/headscale-client-go
