@@ -86,7 +86,7 @@ func TestAPIKeyResource_Create(t *testing.T) {
 			*resp = fakeResp
 		}).Return(nil)
 
-		resp, err := a.Create(ctx, expiration)
+		resp, err := a.Create(ctx, CreateAPIKeyRequest{Expiration: expiration})
 		require.NoError(t, err)
 		assert.Equal(t, fakeResp, resp)
 		mockReq.AssertExpectations(t)
@@ -103,7 +103,7 @@ func TestAPIKeyResource_Create(t *testing.T) {
 		mockReq.On("BuildURL", "apikey").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
 
-		resp, err := a.Create(ctx, expiration)
+		resp, err := a.Create(ctx, CreateAPIKeyRequest{Expiration: expiration})
 		require.Error(t, err)
 		assert.Empty(t, resp.APIKey)
 		mockReq.AssertExpectations(t)
@@ -121,7 +121,7 @@ func TestAPIKeyResource_Create(t *testing.T) {
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
 		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*apikeys.CreateAPIKeyResponse")).Return(errors.New("do error"))
 
-		resp, err := a.Create(ctx, expiration)
+		resp, err := a.Create(ctx, CreateAPIKeyRequest{Expiration: expiration})
 		require.Error(t, err)
 		assert.Empty(t, resp.APIKey)
 		mockReq.AssertExpectations(t)

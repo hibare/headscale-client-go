@@ -2,7 +2,6 @@ package apikeys
 
 import (
 	"context"
-	"time"
 
 	"github.com/stretchr/testify/mock"
 )
@@ -19,8 +18,8 @@ func (m *MockAPIKeyResource) List(ctx context.Context) (APIKeysResponse, error) 
 }
 
 // Create creates a mock API key from the Headscale.
-func (m *MockAPIKeyResource) Create(ctx context.Context, expiration time.Time) (CreateAPIKeyResponse, error) {
-	args := m.Called(ctx, expiration)
+func (m *MockAPIKeyResource) Create(ctx context.Context, createAPIKeyRequest CreateAPIKeyRequest) (CreateAPIKeyResponse, error) {
+	args := m.Called(ctx, createAPIKeyRequest)
 	return args.Get(0).(CreateAPIKeyResponse), args.Error(1) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
 }
 

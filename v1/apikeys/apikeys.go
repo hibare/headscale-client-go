@@ -12,7 +12,7 @@ import (
 // APIKeyResourceInterface is an interface for managing API keys in Headscale.
 type APIKeyResourceInterface interface {
 	List(ctx context.Context) (APIKeysResponse, error)
-	Create(ctx context.Context, expiration time.Time) (CreateAPIKeyResponse, error)
+	Create(ctx context.Context, createAPIKeyRequest CreateAPIKeyRequest) (CreateAPIKeyResponse, error)
 	Expire(ctx context.Context, prefix string) error
 	Delete(ctx context.Context, prefix string) error
 }
@@ -58,14 +58,12 @@ type CreateAPIKeyResponse struct {
 }
 
 // Create creates a new API key in Headscale.
-func (a *APIKeyResource) Create(ctx context.Context, expiration time.Time) (CreateAPIKeyResponse, error) {
+func (a *APIKeyResource) Create(ctx context.Context, createAPIKeyRequest CreateAPIKeyRequest) (CreateAPIKeyResponse, error) {
 	var key CreateAPIKeyResponse
 
 	url := a.r.BuildURL("apikey")
 	req, err := a.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
-		Body: CreateAPIKeyRequest{
-			Expiration: expiration,
-		},
+		Body: createAPIKeyRequest,
 	})
 	if err != nil {
 		return key, err
