@@ -117,11 +117,21 @@ func NewClient(baseURL, apiKey string, opt ClientOptions) (ClientInterface, erro
 	})
 
 	c := &Client{
-		apiKeys:     apikeys.NewAPIKeyResource(request),
-		nodes:       nodes.NewNodeResource(request),
-		policy:      policy.NewPolicyResource(request),
-		users:       users.NewUserResource(request),
-		preAuthKeys: preauthkeys.NewPreAuthKeyResource(request),
+		apiKeys: &apikeys.APIKeyResource{
+			R: request,
+		},
+		nodes: &nodes.NodeResource{
+			R: request,
+		},
+		policy: &policy.PolicyResource{
+			R: request,
+		},
+		users: &users.UserResource{
+			R: request,
+		},
+		preAuthKeys: &preauthkeys.PreAuthKeyResource{
+			R: request,
+		},
 	}
 
 	return c, nil

@@ -60,11 +60,11 @@ func TestClient_ResourceAccessors(t *testing.T) {
 	mockReq.On("Do", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 	c := &Client{
-		apiKeys:     apikeys.NewAPIKeyResource(mockReq),
-		nodes:       nodes.NewNodeResource(mockReq),
-		policy:      policy.NewPolicyResource(mockReq),
-		users:       users.NewUserResource(mockReq),
-		preAuthKeys: preauthkeys.NewPreAuthKeyResource(mockReq),
+		apiKeys:     &apikeys.APIKeyResource{R: mockReq},
+		nodes:       &nodes.NodeResource{R: mockReq},
+		policy:      &policy.PolicyResource{R: mockReq},
+		users:       &users.UserResource{R: mockReq},
+		preAuthKeys: &preauthkeys.PreAuthKeyResource{R: mockReq},
 	}
 	assert.NotNil(t, c.APIKeys())
 	assert.NotNil(t, c.Nodes())

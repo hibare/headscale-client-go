@@ -15,7 +15,7 @@ import (
 func TestUserResource_List(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		u := &UserResource{r: mockReq}
+		u := &UserResource{R: mockReq}
 		ctx := t.Context()
 		filter := UserListFilter{ID: "1", Name: "test", Email: "test@example.com"}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -37,7 +37,7 @@ func TestUserResource_List(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		u := &UserResource{r: mockReq}
+		u := &UserResource{R: mockReq}
 		ctx := t.Context()
 		filter := UserListFilter{}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -54,7 +54,7 @@ func TestUserResource_List(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		u := &UserResource{r: mockReq}
+		u := &UserResource{R: mockReq}
 		ctx := t.Context()
 		filter := UserListFilter{}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -74,7 +74,7 @@ func TestUserResource_List(t *testing.T) {
 func TestUserResource_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		u := &UserResource{r: mockReq}
+		u := &UserResource{R: mockReq}
 		ctx := t.Context()
 		name := "test"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -101,7 +101,7 @@ func TestUserResource_Create(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		u := &UserResource{r: mockReq}
+		u := &UserResource{R: mockReq}
 		ctx := t.Context()
 		name := "test"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -123,7 +123,7 @@ func TestUserResource_Create(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		u := &UserResource{r: mockReq}
+		u := &UserResource{R: mockReq}
 		ctx := t.Context()
 		name := "test"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -148,7 +148,7 @@ func TestUserResource_Create(t *testing.T) {
 func TestUserResource_Delete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		u := &UserResource{r: mockReq}
+		u := &UserResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -165,7 +165,7 @@ func TestUserResource_Delete(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		u := &UserResource{r: mockReq}
+		u := &UserResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -181,7 +181,7 @@ func TestUserResource_Delete(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		u := &UserResource{r: mockReq}
+		u := &UserResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -200,7 +200,7 @@ func TestUserResource_Delete(t *testing.T) {
 func TestUserResource_Rename(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		u := &UserResource{r: mockReq}
+		u := &UserResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		newName := "new-name"
@@ -223,7 +223,7 @@ func TestUserResource_Rename(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		u := &UserResource{r: mockReq}
+		u := &UserResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		newName := "new-name"
@@ -241,7 +241,7 @@ func TestUserResource_Rename(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		u := &UserResource{r: mockReq}
+		u := &UserResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		newName := "new-name"

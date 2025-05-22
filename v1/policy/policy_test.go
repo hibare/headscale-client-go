@@ -15,7 +15,7 @@ import (
 func TestPolicyResource_Get(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PolicyResource{r: mockReq}
+		p := &PolicyResource{R: mockReq}
 		ctx := t.Context()
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -36,7 +36,7 @@ func TestPolicyResource_Get(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PolicyResource{r: mockReq}
+		p := &PolicyResource{R: mockReq}
 		ctx := t.Context()
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -52,7 +52,7 @@ func TestPolicyResource_Get(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PolicyResource{r: mockReq}
+		p := &PolicyResource{R: mockReq}
 		ctx := t.Context()
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -71,7 +71,7 @@ func TestPolicyResource_Get(t *testing.T) {
 func TestPolicyResource_Update(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PolicyResource{r: mockReq}
+		p := &PolicyResource{R: mockReq}
 		ctx := t.Context()
 		policyStr := "new-policy"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -96,7 +96,7 @@ func TestPolicyResource_Update(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PolicyResource{r: mockReq}
+		p := &PolicyResource{R: mockReq}
 		ctx := t.Context()
 		policyStr := "new-policy"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -113,7 +113,7 @@ func TestPolicyResource_Update(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PolicyResource{r: mockReq}
+		p := &PolicyResource{R: mockReq}
 		ctx := t.Context()
 		policyStr := "new-policy"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}

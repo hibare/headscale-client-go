@@ -17,7 +17,7 @@ import (
 func TestPreAuthKeyResource_List(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{r: mockReq}
+		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
 		filter := PreAuthKeyListFilter{User: 1}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -39,7 +39,7 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 
 	t.Run("no user", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{r: mockReq}
+		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
 		filter := PreAuthKeyListFilter{}
 		resp, err := p.List(ctx, filter)
@@ -50,7 +50,7 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{r: mockReq}
+		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
 		filter := PreAuthKeyListFilter{User: 1}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -67,7 +67,7 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{r: mockReq}
+		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
 		filter := PreAuthKeyListFilter{User: 1}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -87,7 +87,7 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 func TestPreAuthKeyResource_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{r: mockReq}
+		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
 		request := CreatePreAuthKeyRequest{
 			User:       "testuser",
@@ -117,7 +117,7 @@ func TestPreAuthKeyResource_Create(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{r: mockReq}
+		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
 		request := CreatePreAuthKeyRequest{
 			User:       "testuser",
@@ -140,7 +140,7 @@ func TestPreAuthKeyResource_Create(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{r: mockReq}
+		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
 		request := CreatePreAuthKeyRequest{
 			User:       "testuser",
@@ -166,7 +166,7 @@ func TestPreAuthKeyResource_Create(t *testing.T) {
 func TestPreAuthKeyResource_Expire(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{r: mockReq}
+		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
 		user := "testuser"
 		key := "key1"
@@ -184,7 +184,7 @@ func TestPreAuthKeyResource_Expire(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{r: mockReq}
+		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
 		user := "testuser"
 		key := "key1"
@@ -201,7 +201,7 @@ func TestPreAuthKeyResource_Expire(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{r: mockReq}
+		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
 		user := "testuser"
 		key := "key1"

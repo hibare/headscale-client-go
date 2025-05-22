@@ -16,7 +16,7 @@ import (
 func TestNodeResource_List(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		filter := NodeListFilter{User: "testuser"}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -38,7 +38,7 @@ func TestNodeResource_List(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		filter := NodeListFilter{}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -55,7 +55,7 @@ func TestNodeResource_List(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		filter := NodeListFilter{}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -75,7 +75,7 @@ func TestNodeResource_List(t *testing.T) {
 func TestNodeResource_Get(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -97,7 +97,7 @@ func TestNodeResource_Get(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -114,7 +114,7 @@ func TestNodeResource_Get(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -134,7 +134,7 @@ func TestNodeResource_Get(t *testing.T) {
 func TestNodeResource_Register(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		user := "testuser"
 		key := "testkey"
@@ -157,7 +157,7 @@ func TestNodeResource_Register(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		user := "testuser"
 		key := "testkey"
@@ -175,7 +175,7 @@ func TestNodeResource_Register(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		user := "testuser"
 		key := "testkey"
@@ -196,7 +196,7 @@ func TestNodeResource_Register(t *testing.T) {
 func TestNodeResource_Delete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -213,7 +213,7 @@ func TestNodeResource_Delete(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -229,7 +229,7 @@ func TestNodeResource_Delete(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -248,7 +248,7 @@ func TestNodeResource_Delete(t *testing.T) {
 func TestNodeResource_Expire(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -265,7 +265,7 @@ func TestNodeResource_Expire(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -281,7 +281,7 @@ func TestNodeResource_Expire(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -300,7 +300,7 @@ func TestNodeResource_Expire(t *testing.T) {
 func TestNodeResource_Rename(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		name := "newname"
@@ -323,7 +323,7 @@ func TestNodeResource_Rename(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		name := "newname"
@@ -341,7 +341,7 @@ func TestNodeResource_Rename(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		name := "newname"
@@ -363,7 +363,7 @@ func TestNodeResource_Rename(t *testing.T) {
 func TestNodeResource_AddTags(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		tags := []string{"tag1", "tag2"}
@@ -386,7 +386,7 @@ func TestNodeResource_AddTags(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		tags := []string{"tag1", "tag2"}
@@ -404,7 +404,7 @@ func TestNodeResource_AddTags(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		tags := []string{"tag1", "tag2"}
@@ -425,7 +425,7 @@ func TestNodeResource_AddTags(t *testing.T) {
 func TestNodeResource_UpdateUser(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		user := "newuser"
@@ -448,7 +448,7 @@ func TestNodeResource_UpdateUser(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		user := "newuser"
@@ -466,7 +466,7 @@ func TestNodeResource_UpdateUser(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		user := "newuser"
@@ -487,7 +487,7 @@ func TestNodeResource_UpdateUser(t *testing.T) {
 func TestNodeResource_BackFillIP(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -509,7 +509,7 @@ func TestNodeResource_BackFillIP(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -526,7 +526,7 @@ func TestNodeResource_BackFillIP(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -547,7 +547,7 @@ func TestNodeResource_BackFillIP(t *testing.T) {
 func TestNodeResource_ApproveRoutes(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		routes := []string{"10.0.0.0/24", "192.168.1.0/24"}
@@ -570,7 +570,7 @@ func TestNodeResource_ApproveRoutes(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		routes := []string{"10.0.0.0/24", "192.168.1.0/24"}
@@ -588,7 +588,7 @@ func TestNodeResource_ApproveRoutes(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		n := &NodeResource{r: mockReq}
+		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
 		id := "1"
 		routes := []string{"10.0.0.0/24", "192.168.1.0/24"}

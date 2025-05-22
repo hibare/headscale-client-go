@@ -58,15 +58,15 @@ func (p *PreAuthKeyResource) List(ctx context.Context, filter PreAuthKeyListFilt
 	}
 
 	queryParams["user"] = filter.User
-	url := p.r.BuildURL("preauthkey")
-	req, err := p.r.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{
+	url := p.R.BuildURL("preauthkey")
+	req, err := p.R.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{
 		QueryParams: queryParams,
 	})
 	if err != nil {
 		return keys, err
 	}
 
-	err = p.r.Do(ctx, req, &keys)
+	err = p.R.Do(ctx, req, &keys)
 	return keys, err
 }
 
@@ -88,15 +88,15 @@ type PreAuthKeyResponse struct {
 func (p *PreAuthKeyResource) Create(ctx context.Context, createPreAuthKeyRequest CreatePreAuthKeyRequest) (PreAuthKeyResponse, error) {
 	var key PreAuthKeyResponse
 
-	url := p.r.BuildURL("preauthkey")
-	req, err := p.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := p.R.BuildURL("preauthkey")
+	req, err := p.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: createPreAuthKeyRequest,
 	})
 	if err != nil {
 		return key, err
 	}
 
-	err = p.r.Do(ctx, req, &key)
+	err = p.R.Do(ctx, req, &key)
 	return key, err
 }
 
@@ -108,8 +108,8 @@ type ExpirePreAuthKeyRequest struct {
 
 // Expire expires a pre-auth key in Headscale.
 func (p *PreAuthKeyResource) Expire(ctx context.Context, user string, key string) error {
-	url := p.r.BuildURL("preauthkey", "expire")
-	req, err := p.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := p.R.BuildURL("preauthkey", "expire")
+	req, err := p.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: ExpirePreAuthKeyRequest{
 			User: user,
 			Key:  key,
@@ -119,17 +119,10 @@ func (p *PreAuthKeyResource) Expire(ctx context.Context, user string, key string
 		return err
 	}
 
-	return p.r.Do(ctx, req, nil)
+	return p.R.Do(ctx, req, nil)
 }
 
 // PreAuthKeyResource is a struct that implements the PreAuthKeyResourceInterface.
 type PreAuthKeyResource struct {
-	r requests.RequestInterface
-}
-
-// NewPreAuthKeyResource creates a new PreAuthKeyResource.
-func NewPreAuthKeyResource(r requests.RequestInterface) *PreAuthKeyResource {
-	return &PreAuthKeyResource{
-		r: r,
-	}
+	R requests.RequestInterface
 }

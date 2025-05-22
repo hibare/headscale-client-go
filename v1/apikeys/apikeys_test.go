@@ -16,7 +16,7 @@ import (
 func TestAPIKeyResource_List(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{r: mockReq}
+		a := &APIKeyResource{R: mockReq}
 		ctx := t.Context()
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -37,7 +37,7 @@ func TestAPIKeyResource_List(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{r: mockReq}
+		a := &APIKeyResource{R: mockReq}
 		ctx := t.Context()
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -53,7 +53,7 @@ func TestAPIKeyResource_List(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{r: mockReq}
+		a := &APIKeyResource{R: mockReq}
 		ctx := t.Context()
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
@@ -72,7 +72,7 @@ func TestAPIKeyResource_List(t *testing.T) {
 func TestAPIKeyResource_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{r: mockReq}
+		a := &APIKeyResource{R: mockReq}
 		ctx := t.Context()
 		expiration := time.Now().Add(24 * time.Hour)
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -94,7 +94,7 @@ func TestAPIKeyResource_Create(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{r: mockReq}
+		a := &APIKeyResource{R: mockReq}
 		ctx := t.Context()
 		expiration := time.Now().Add(24 * time.Hour)
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -111,7 +111,7 @@ func TestAPIKeyResource_Create(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{r: mockReq}
+		a := &APIKeyResource{R: mockReq}
 		ctx := t.Context()
 		expiration := time.Now().Add(24 * time.Hour)
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -131,7 +131,7 @@ func TestAPIKeyResource_Create(t *testing.T) {
 func TestAPIKeyResource_Expire(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{r: mockReq}
+		a := &APIKeyResource{R: mockReq}
 		ctx := t.Context()
 		prefix := "prefix1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -148,7 +148,7 @@ func TestAPIKeyResource_Expire(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{r: mockReq}
+		a := &APIKeyResource{R: mockReq}
 		ctx := t.Context()
 		prefix := "prefix1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -164,7 +164,7 @@ func TestAPIKeyResource_Expire(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{r: mockReq}
+		a := &APIKeyResource{R: mockReq}
 		ctx := t.Context()
 		prefix := "prefix1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -183,7 +183,7 @@ func TestAPIKeyResource_Expire(t *testing.T) {
 func TestAPIKeyResource_Delete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{r: mockReq}
+		a := &APIKeyResource{R: mockReq}
 		ctx := t.Context()
 		prefix := "prefix1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -200,7 +200,7 @@ func TestAPIKeyResource_Delete(t *testing.T) {
 
 	t.Run("build request error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{r: mockReq}
+		a := &APIKeyResource{R: mockReq}
 		ctx := t.Context()
 		prefix := "prefix1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
@@ -216,7 +216,7 @@ func TestAPIKeyResource_Delete(t *testing.T) {
 
 	t.Run("do error", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{r: mockReq}
+		a := &APIKeyResource{R: mockReq}
 		ctx := t.Context()
 		prefix := "prefix1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}

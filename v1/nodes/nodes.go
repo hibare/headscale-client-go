@@ -74,15 +74,15 @@ func (n *NodeResource) List(ctx context.Context, filter NodeListFilter) (NodesRe
 		queryParams["user"] = filter.User
 	}
 
-	url := n.r.BuildURL("node")
-	req, err := n.r.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{
+	url := n.R.BuildURL("node")
+	req, err := n.R.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{
 		QueryParams: queryParams,
 	})
 	if err != nil {
 		return nodes, err
 	}
 
-	err = n.r.Do(ctx, req, &nodes)
+	err = n.R.Do(ctx, req, &nodes)
 	return nodes, err
 }
 
@@ -90,13 +90,13 @@ func (n *NodeResource) List(ctx context.Context, filter NodeListFilter) (NodesRe
 func (n *NodeResource) Get(ctx context.Context, id string) (NodeResponse, error) {
 	var node NodeResponse
 
-	url := n.r.BuildURL("node", id)
-	req, err := n.r.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
+	url := n.R.BuildURL("node", id)
+	req, err := n.R.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
 	if err != nil {
 		return node, err
 	}
 
-	err = n.r.Do(ctx, req, &node)
+	err = n.R.Do(ctx, req, &node)
 	return node, err
 }
 
@@ -104,8 +104,8 @@ func (n *NodeResource) Get(ctx context.Context, id string) (NodeResponse, error)
 func (n *NodeResource) Register(ctx context.Context, user, key string) (NodeResponse, error) {
 	var node NodeResponse
 
-	url := n.r.BuildURL("node", "register")
-	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := n.R.BuildURL("node", "register")
+	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		QueryParams: map[string]interface{}{
 			"user": user,
 			"key":  key,
@@ -115,19 +115,19 @@ func (n *NodeResource) Register(ctx context.Context, user, key string) (NodeResp
 		return node, err
 	}
 
-	err = n.r.Do(ctx, req, &node)
+	err = n.R.Do(ctx, req, &node)
 	return node, err
 }
 
 // Delete removes a node from the Headscale.
 func (n *NodeResource) Delete(ctx context.Context, id string) error {
-	url := n.r.BuildURL("node", id)
-	req, err := n.r.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{})
+	url := n.R.BuildURL("node", id)
+	req, err := n.R.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{})
 	if err != nil {
 		return err
 	}
 
-	return n.r.Do(ctx, req, nil)
+	return n.R.Do(ctx, req, nil)
 }
 
 // ApproveRoutesRequest represents a request to approve routes for a node.
@@ -139,40 +139,40 @@ type ApproveRoutesRequest struct {
 func (n *NodeResource) ApproveRoutes(ctx context.Context, id string, routes []string) (NodeResponse, error) {
 	var node NodeResponse
 
-	url := n.r.BuildURL("node", id, "approve_routes")
-	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := n.R.BuildURL("node", id, "approve_routes")
+	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: ApproveRoutesRequest{Routes: routes},
 	})
 	if err != nil {
 		return node, err
 	}
 
-	err = n.r.Do(ctx, req, &node)
+	err = n.R.Do(ctx, req, &node)
 	return node, err
 }
 
 // Expire marks a node as expired in the Headscale.
 func (n *NodeResource) Expire(ctx context.Context, id string) error {
-	url := n.r.BuildURL("node", id, "expire")
-	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
+	url := n.R.BuildURL("node", id, "expire")
+	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
 	if err != nil {
 		return err
 	}
 
-	return n.r.Do(ctx, req, nil)
+	return n.R.Do(ctx, req, nil)
 }
 
 // Rename renames a node in the Headscale.
 func (n *NodeResource) Rename(ctx context.Context, id, name string) (NodeResponse, error) {
 	var node NodeResponse
 
-	url := n.r.BuildURL("node", id, "rename", name)
-	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
+	url := n.R.BuildURL("node", id, "rename", name)
+	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
 	if err != nil {
 		return node, err
 	}
 
-	err = n.r.Do(ctx, req, &node)
+	err = n.R.Do(ctx, req, &node)
 	return node, err
 }
 
@@ -185,15 +185,15 @@ type AddTagsRequest struct {
 func (n *NodeResource) AddTags(ctx context.Context, id string, tags []string) (NodeResponse, error) {
 	var node NodeResponse
 
-	url := n.r.BuildURL("node", id, "tags")
-	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := n.R.BuildURL("node", id, "tags")
+	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: AddTagsRequest{Tags: tags},
 	})
 	if err != nil {
 		return node, err
 	}
 
-	err = n.r.Do(ctx, req, &node)
+	err = n.R.Do(ctx, req, &node)
 	return node, err
 }
 
@@ -206,15 +206,15 @@ type UpdateUserRequest struct {
 func (n *NodeResource) UpdateUser(ctx context.Context, id, user string) (NodeResponse, error) {
 	var node NodeResponse
 
-	url := n.r.BuildURL("node", id, "user")
-	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := n.R.BuildURL("node", id, "user")
+	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: UpdateUserRequest{User: user},
 	})
 	if err != nil {
 		return node, err
 	}
 
-	err = n.r.Do(ctx, req, &node)
+	err = n.R.Do(ctx, req, &node)
 	return node, err
 }
 
@@ -225,25 +225,18 @@ type BackfillIPsResponse struct {
 
 // BackFillIP backfills the IP address for a node in the Headscale.
 func (n *NodeResource) BackFillIP(ctx context.Context, id string) (BackfillIPsResponse, error) {
-	url := n.r.BuildURL("node", id, "backfill_ip")
-	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
+	url := n.R.BuildURL("node", id, "backfill_ip")
+	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
 	if err != nil {
 		return BackfillIPsResponse{}, err
 	}
 
 	var backfillIPs BackfillIPsResponse
-	err = n.r.Do(ctx, req, &backfillIPs)
+	err = n.R.Do(ctx, req, &backfillIPs)
 	return backfillIPs, err
 }
 
 // NodeResource is a struct that provides methods to interact with the nodes API of Headscale.
 type NodeResource struct {
-	r requests.RequestInterface
-}
-
-// NewNodeResource creates a new NodeResource.
-func NewNodeResource(r requests.RequestInterface) *NodeResource {
-	return &NodeResource{
-		r: r,
-	}
+	R requests.RequestInterface
 }

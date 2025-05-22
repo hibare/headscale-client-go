@@ -31,13 +31,13 @@ type UpdatePolicyRequest struct {
 func (p *PolicyResource) Get(ctx context.Context) (Policy, error) {
 	var policy Policy
 
-	url := p.r.BuildURL("policy")
-	req, err := p.r.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
+	url := p.R.BuildURL("policy")
+	req, err := p.R.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
 	if err != nil {
 		return policy, err
 	}
 
-	err = p.r.Do(ctx, req, &policy)
+	err = p.R.Do(ctx, req, &policy)
 	return policy, err
 }
 
@@ -51,8 +51,8 @@ type UpdatePolicyResponse struct {
 func (p *PolicyResource) Update(ctx context.Context, policy string) (UpdatePolicyResponse, error) {
 	var updatePolicy UpdatePolicyResponse
 
-	url := p.r.BuildURL("policy")
-	req, err := p.r.BuildRequest(ctx, http.MethodPut, url, requests.RequestOptions{
+	url := p.R.BuildURL("policy")
+	req, err := p.R.BuildRequest(ctx, http.MethodPut, url, requests.RequestOptions{
 		Body: UpdatePolicyRequest{
 			Policy: policy,
 		},
@@ -61,7 +61,7 @@ func (p *PolicyResource) Update(ctx context.Context, policy string) (UpdatePolic
 		return updatePolicy, err
 	}
 
-	err = p.r.Do(ctx, req, &updatePolicy)
+	err = p.R.Do(ctx, req, &updatePolicy)
 	return updatePolicy, err
 }
 
@@ -69,12 +69,5 @@ func (p *PolicyResource) Update(ctx context.Context, policy string) (UpdatePolic
 //
 //nolint:revive // This is a resource for the policy.
 type PolicyResource struct {
-	r requests.RequestInterface
-}
-
-// NewPolicyResource creates a new PolicyResource.
-func NewPolicyResource(r requests.RequestInterface) *PolicyResource {
-	return &PolicyResource{
-		r: r,
-	}
+	R requests.RequestInterface
 }
