@@ -1,14 +1,19 @@
+<div align="center">
+  <img src="./assets/logo.png" alt="headscale-cleint-go Logo" width="200" height="200">
+
 # Headscale Client Go
+
+_A Go client for the [Headscale](https://headscale.net) HTTP API._
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/tailscale/tailscale-client-go/v2.svg)](https://pkg.go.dev/github.com/hibare/headscale-client-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hibare/headscale-client-go)](https://goreportcard.com/report/github.com/hibare/headscale-client-go)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhibare%2Fheadscale-client-go.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhibare%2Fheadscale-client-go?ref=badge_shield&issueType=license)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhibare%2Fheadscale-client-go.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhibare%2Fheadscale-client-go?ref=badge_shield&issueType=security)
 
-A Go client for the [Headscale](https://headscale.net) HTTP API.
+</div>
 
-> **CAUTION**
+> [!CAUTION]
 > This project is under active development and may not yet be stable. If you encounter any issues, please open an issue report.
-
----
 
 ## Features
 
@@ -24,7 +29,7 @@ A Go client for the [Headscale](https://headscale.net) HTTP API.
 
 ## Installation
 
-Requires **Go 1.24+**
+Requires **Go 1.24+** and **Headscale v0.26.0** & above.
 
 ```sh
 go get github.com/hibare/headscale-client-go
