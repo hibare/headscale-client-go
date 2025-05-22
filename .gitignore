@@ -58,3 +58,6 @@ coverage.out
 
 # Environment variables
 .env
+
+# Data
+.data

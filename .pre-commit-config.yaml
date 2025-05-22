@@ -26,7 +26,6 @@ repos:
     hooks:
       - id: go-mod-tidy
       - id: go-fmt
-      - id: go-vet
       - id: golangci-lint
       - id: go-build
   - repo: local
