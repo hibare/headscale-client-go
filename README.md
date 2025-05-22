@@ -39,7 +39,7 @@ go get github.com/hibare/headscale-client-go
 
 ## Usage
 
-See the `examples/` directory for usage examples.
+See the [`examples/`](examples/) directory for usage examples.
 
 ### API Overview
 
