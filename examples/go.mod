@@ -2,11 +2,11 @@ module github.com/hibare/headscale-client-example
 
 go 1.24.3
 
-replace github.com/hibare/headscale-client-go => ../
+// replace github.com/hibare/headscale-client-go => ../
 
 require (
-	github.com/hibare/headscale-client-go v0.0.0-00010101000000-000000000000
-	github.com/stretchr/testify v1.9.0
+	github.com/hibare/headscale-client-go v0.3.0
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
