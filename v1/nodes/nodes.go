@@ -4,6 +4,7 @@ package nodes
 import (
 	"context"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/hibare/headscale-client-go/requests"
@@ -46,6 +47,11 @@ type Node struct {
 	ApprovedRoutes  []string                `json:"approvedRoutes"`
 	AvailableRoutes []string                `json:"availableRoutes"`
 	SubnetRoutes    []string                `json:"subnetRoutes"`
+}
+
+// IsExitNode returns true if the node is an exit node.
+func (n *Node) IsExitNode() bool {
+	return slices.Contains(n.ApprovedRoutes, ExitRouteIPv4) || slices.Contains(n.ApprovedRoutes, ExitRouteIPv6)
 }
 
 // NodeResponse represents a single node response from the API.
