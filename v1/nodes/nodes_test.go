@@ -72,6 +72,64 @@ func TestNodeResource_List(t *testing.T) {
 	})
 }
 
+func TestIsExitNode(t *testing.T) {
+	tests := []struct {
+		Name             string
+		N                Node
+		ExpectedExitNode bool
+	}{
+		{
+			Name: "is exit node (IPv4)",
+			N: Node{
+				ID: "1",
+				ApprovedRoutes: []string{
+					"0.0.0.0/0",
+				},
+			},
+			ExpectedExitNode: true,
+		},
+		{
+			Name: "is Exit node (IPv6)",
+			N: Node{
+				ID: "1",
+				ApprovedRoutes: []string{
+					"::/0",
+				},
+			},
+			ExpectedExitNode: true,
+		},
+		{
+			Name: "is exit node",
+			N: Node{
+				ID: "1",
+				ApprovedRoutes: []string{
+					"::/0",
+					"0.0.0.0/0",
+				},
+			},
+			ExpectedExitNode: true,
+		},
+		{
+			Name: "is not exit node",
+			N: Node{
+				ID:             "1",
+				ApprovedRoutes: []string{},
+			},
+			ExpectedExitNode: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			if tt.ExpectedExitNode {
+				assert.True(t, tt.N.IsExitNode())
+			} else {
+				assert.False(t, tt.N.IsExitNode())
+			}
+		})
+	}
+}
+
 func TestNodeResource_Get(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
