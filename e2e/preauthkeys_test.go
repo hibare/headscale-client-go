@@ -15,6 +15,9 @@ func (s *E2ESuite) TestPreAuthKeys_List() {
 func (s *E2ESuite) TestPreAuthKeys_CreateAndDelete() {
 	ctx := s.T().Context()
 
+	keysBefore, err := s.client.PreAuthKeys().List(ctx)
+	s.Require().NoError(err)
+
 	key, err := s.client.PreAuthKeys().Create(ctx, preauthkeys.CreatePreAuthKeyRequest{
 		User:       s.testUser.ID,
 		Reusable:   true,
@@ -24,15 +27,16 @@ func (s *E2ESuite) TestPreAuthKeys_CreateAndDelete() {
 	s.Require().NoError(err)
 	s.NotEmpty(key.PreAuthKey.Key, "Expected pre-auth key to be created")
 
-	keysBefore, err := s.client.PreAuthKeys().List(ctx)
+	keysAfter, err := s.client.PreAuthKeys().List(ctx)
 	s.Require().NoError(err)
+	s.Greater(len(keysAfter.PreAuthKeys), len(keysBefore.PreAuthKeys), "Expected one more pre-auth key after creation")
 
 	err = s.client.PreAuthKeys().Delete(ctx, key.PreAuthKey.ID)
 	s.Require().NoError(err)
 
-	keysAfter, err := s.client.PreAuthKeys().List(ctx)
+	keysFinal, err := s.client.PreAuthKeys().List(ctx)
 	s.Require().NoError(err)
-	s.Less(len(keysAfter.PreAuthKeys), len(keysBefore.PreAuthKeys), "Expected one less pre-auth key after deletion")
+	s.Len(keysFinal.PreAuthKeys, len(keysBefore.PreAuthKeys), "Expected same number of keys as before creation")
 }
 
 func (s *E2ESuite) TestPreAuthKeys_Expire() {
@@ -46,9 +50,17 @@ func (s *E2ESuite) TestPreAuthKeys_Expire() {
 	})
 	s.Require().NoError(err)
 	s.NotEmpty(key.PreAuthKey.Key, "Expected pre-auth key to be created")
+	s.False(key.PreAuthKey.Expiration.Before(time.Now()), "Expected key to not be expired initially")
 
 	err = s.client.PreAuthKeys().Expire(ctx, key.PreAuthKey.ID)
 	s.Require().NoError(err)
+
+	// Verify the key is expired
+	keys, err := s.client.PreAuthKeys().List(ctx)
+	s.Require().NoError(err)
+	expiredKey := s.findPreAuthKeyByID(keys.PreAuthKeys, key.PreAuthKey.ID)
+	s.Require().NotNil(expiredKey, "Expected to find the expired key")
+	s.True(expiredKey.Expiration.Before(time.Now()), "Expected key to be expired after expire call")
 
 	err = s.client.PreAuthKeys().Delete(ctx, key.PreAuthKey.ID)
 	s.Require().NoError(err)
@@ -97,8 +109,18 @@ func (s *E2ESuite) TestPreAuthKeys_WithACLTags() {
 		ACLTags:    []string{"tag:test"},
 	})
 	s.Require().NoError(err)
-	s.NotEmpty(key.PreAuthKey.ACLTags, "Expected pre-auth key to have ACL tags")
+	s.Require().Contains(key.PreAuthKey.ACLTags, "tag:test", "Expected pre-auth key to have the specified ACL tag")
 
 	err = s.client.PreAuthKeys().Delete(ctx, key.PreAuthKey.ID)
 	s.Require().NoError(err)
+}
+
+// findPreAuthKeyByID finds a pre-auth key by ID in the given slice.
+func (s *E2ESuite) findPreAuthKeyByID(keys []preauthkeys.PreAuthKey, id string) *preauthkeys.PreAuthKey {
+	for i := range keys {
+		if keys[i].ID == id {
+			return &keys[i]
+		}
+	}
+	return nil
 }

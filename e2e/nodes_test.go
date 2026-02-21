@@ -60,7 +60,7 @@ func (s *E2ESuite) TestNodes_AddTags() {
 	tags := []string{"tag:e2e-test"}
 	taggedNode, err := s.client.Nodes().AddTags(ctx, nodeList.Nodes[0].ID, tags)
 	s.Require().NoError(err)
-	s.NotEmpty(taggedNode.Node.Tags, "Expected node to have tags")
+	s.Require().Contains(taggedNode.Node.Tags, "tag:e2e-test", "Expected node to have the added tag")
 }
 
 func (s *E2ESuite) TestNodes_BackFillIP() {

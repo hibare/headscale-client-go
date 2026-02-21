@@ -13,6 +13,9 @@ func (s *E2ESuite) TestUsers_List() {
 func (s *E2ESuite) TestUsers_CreateAndDelete() {
 	ctx := s.T().Context()
 
+	usersBefore, err := s.client.Users().List(ctx, users.UserListFilter{})
+	s.Require().NoError(err)
+
 	userName := "test-user-create"
 
 	user, err := s.client.Users().Create(ctx, users.CreateUserRequest{
@@ -21,15 +24,16 @@ func (s *E2ESuite) TestUsers_CreateAndDelete() {
 	s.Require().NoError(err)
 	s.Equal(userName, user.User.Name, "Expected user name to match")
 
-	usersBefore, err := s.client.Users().List(ctx, users.UserListFilter{})
+	usersAfter, err := s.client.Users().List(ctx, users.UserListFilter{})
 	s.Require().NoError(err)
+	s.Greater(len(usersAfter.Users), len(usersBefore.Users), "Expected one more user after creation")
 
 	err = s.client.Users().Delete(ctx, user.User.ID)
 	s.Require().NoError(err)
 
-	usersAfter, err := s.client.Users().List(ctx, users.UserListFilter{})
+	usersFinal, err := s.client.Users().List(ctx, users.UserListFilter{})
 	s.Require().NoError(err)
-	s.Less(len(usersAfter.Users), len(usersBefore.Users), "Expected one less user after deletion")
+	s.Len(usersFinal.Users, len(usersBefore.Users), "Expected same number of users as before creation")
 }
 
 func (s *E2ESuite) TestUsers_Rename() {
@@ -62,18 +66,12 @@ func (s *E2ESuite) TestUsers_GetByID() {
 	})
 	s.Require().NoError(err)
 
-	usersList, err := s.client.Users().List(ctx, users.UserListFilter{})
+	// Use filter to get the specific user by ID
+	usersList, err := s.client.Users().List(ctx, users.UserListFilter{ID: user.User.ID})
 	s.Require().NoError(err)
-
-	var found bool
-	for _, u := range usersList.Users {
-		if u.ID == user.User.ID {
-			found = true
-			s.Equal(user.User.Name, u.Name, "Expected user name to match")
-			break
-		}
-	}
-	s.True(found, "Expected to find created user in list")
+	s.Require().Len(usersList.Users, 1, "Expected exactly one user with the given ID")
+	s.Equal(user.User.ID, usersList.Users[0].ID, "Expected user ID to match")
+	s.Equal(userName, usersList.Users[0].Name, "Expected user name to match")
 
 	err = s.client.Users().Delete(ctx, user.User.ID)
 	s.Require().NoError(err)
