@@ -178,8 +178,6 @@ func (s *E2ESuite) createAPIKey(ctx context.Context) (string, error) {
 	}
 	apiKey = strings.TrimSpace(apiKey)
 
-	s.T().Logf("API key: %s", apiKey)
-
 	if apiKey == "" {
 		return "", fmt.Errorf("API key is empty, raw output: %s", output)
 	}
