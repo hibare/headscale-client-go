@@ -3,7 +3,6 @@ package preauthkeys
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"time"
 
@@ -11,23 +10,19 @@ import (
 	"github.com/hibare/headscale-client-go/v1/users"
 )
 
-var (
-	// ErrNoUser is returned when a user is required but not provided.
-	ErrNoUser = errors.New("user is required")
-)
-
 // PreAuthKeyResourceInterface is an interface for managing pre-auth keys in Headscale.
 type PreAuthKeyResourceInterface interface {
-	List(ctx context.Context, filter PreAuthKeyListFilter) (PreAuthKeysResponse, error)
+	List(ctx context.Context) (PreAuthKeysResponse, error)
 	Create(ctx context.Context, createPreAuthKeyRequest CreatePreAuthKeyRequest) (PreAuthKeyResponse, error)
-	Expire(ctx context.Context, user string, key string) error
+	Expire(ctx context.Context, id string) error
+	Delete(ctx context.Context, id string) error
 }
 
 // PreAuthKey represents a pre-auth key in Headscale.
 type PreAuthKey struct {
-	User       users.User `json:"user"`
 	ID         string     `json:"id"`
-	Key        string     `json:"key"`
+	User       users.User `json:"user,omitempty"`
+	Key        string     `json:"key,omitempty"`
 	Reusable   bool       `json:"reusable"`
 	Ephemeral  bool       `json:"ephemeral"`
 	Used       bool       `json:"used"`
@@ -43,25 +38,12 @@ type PreAuthKeysResponse struct {
 	PreAuthKeys []PreAuthKey `json:"preAuthKeys"`
 }
 
-// PreAuthKeyListFilter represents a filter for listing pre-auth keys.
-type PreAuthKeyListFilter struct {
-	User int `json:"user"`
-}
-
 // List returns a list of pre-auth keys from the Headscale.
-func (p *PreAuthKeyResource) List(ctx context.Context, filter PreAuthKeyListFilter) (PreAuthKeysResponse, error) {
+func (p *PreAuthKeyResource) List(ctx context.Context) (PreAuthKeysResponse, error) {
 	var keys PreAuthKeysResponse
 
-	queryParams := map[string]any{}
-	if filter.User == 0 {
-		return keys, ErrNoUser
-	}
-
-	queryParams["user"] = filter.User
 	url := p.R.BuildURL("preauthkey")
-	req, err := p.R.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{
-		QueryParams: queryParams,
-	})
+	req, err := p.R.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
 	if err != nil {
 		return keys, err
 	}
@@ -100,20 +82,24 @@ func (p *PreAuthKeyResource) Create(ctx context.Context, createPreAuthKeyRequest
 	return key, err
 }
 
-// ExpirePreAuthKeyRequest represents a request to expire a pre-auth key.
-type ExpirePreAuthKeyRequest struct {
-	User string `json:"user"`
-	Key  string `json:"key"`
-}
-
 // Expire expires a pre-auth key in Headscale.
-func (p *PreAuthKeyResource) Expire(ctx context.Context, user string, key string) error {
+func (p *PreAuthKeyResource) Expire(ctx context.Context, id string) error {
 	url := p.R.BuildURL("preauthkey", "expire")
 	req, err := p.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
-		Body: ExpirePreAuthKeyRequest{
-			User: user,
-			Key:  key,
-		},
+		Body: map[string]string{"id": id},
+	})
+	if err != nil {
+		return err
+	}
+
+	return p.R.Do(ctx, req, nil)
+}
+
+// Delete removes a pre-auth key from the Headscale.
+func (p *PreAuthKeyResource) Delete(ctx context.Context, id string) error {
+	url := p.R.BuildURL("preauthkey")
+	req, err := p.R.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{
+		QueryParams: map[string]any{"id": id},
 	})
 	if err != nil {
 		return err

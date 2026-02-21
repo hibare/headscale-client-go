@@ -21,7 +21,6 @@ type NodeResourceInterface interface {
 	Expire(ctx context.Context, id string) error
 	Rename(ctx context.Context, id, name string) (NodeResponse, error)
 	AddTags(ctx context.Context, id string, tags []string) (NodeResponse, error)
-	UpdateUser(ctx context.Context, id, user string) (NodeResponse, error)
 	BackFillIP(ctx context.Context, id string) (BackfillIPsResponse, error)
 }
 
@@ -39,9 +38,7 @@ type Node struct {
 	PreAuthKey      *preauthkeys.PreAuthKey `json:"preAuthKey"`
 	CreatedAt       time.Time               `json:"createdAt"`
 	RegisterMethod  string                  `json:"registerMethod"`
-	ForcedTags      []string                `json:"forcedTags"`
-	InvalidTags     []string                `json:"invalidTags"`
-	ValidTags       []string                `json:"validTags"`
+	Tags            []string                `json:"tags"`
 	GivenName       string                  `json:"givenName"`
 	Online          bool                    `json:"online"`
 	ApprovedRoutes  []string                `json:"approvedRoutes"`
@@ -194,27 +191,6 @@ func (n *NodeResource) AddTags(ctx context.Context, id string, tags []string) (N
 	url := n.R.BuildURL("node", id, "tags")
 	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: AddTagsRequest{Tags: tags},
-	})
-	if err != nil {
-		return node, err
-	}
-
-	err = n.R.Do(ctx, req, &node)
-	return node, err
-}
-
-// UpdateUserRequest represents a request to update the user associated with a node.
-type UpdateUserRequest struct {
-	User string `json:"user"`
-}
-
-// UpdateUser updates the user associated with a node in the Headscale.
-func (n *NodeResource) UpdateUser(ctx context.Context, id, user string) (NodeResponse, error) {
-	var node NodeResponse
-
-	url := n.R.BuildURL("node", id, "user")
-	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
-		Body: UpdateUserRequest{User: user},
 	})
 	if err != nil {
 		return node, err

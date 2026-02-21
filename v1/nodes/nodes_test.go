@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/hibare/headscale-client-go/requests"
-	"github.com/hibare/headscale-client-go/v1/users"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -427,7 +426,7 @@ func TestNodeResource_AddTags(t *testing.T) {
 		tags := []string{"tag1", "tag2"}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
-		fakeResp := NodeResponse{Node: Node{ID: id, ValidTags: tags}}
+		fakeResp := NodeResponse{Node: Node{ID: id, Tags: tags}}
 
 		mockReq.On("BuildURL", "node", id, "tags").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
@@ -474,68 +473,6 @@ func TestNodeResource_AddTags(t *testing.T) {
 		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*nodes.NodeResponse")).Return(errors.New("do error"))
 
 		resp, err := n.AddTags(ctx, id, tags)
-		require.Error(t, err)
-		assert.Empty(t, resp.Node)
-		mockReq.AssertExpectations(t)
-	})
-}
-
-func TestNodeResource_UpdateUser(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		n := &NodeResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		user := "newuser"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-		fakeResp := NodeResponse{Node: Node{ID: id, User: users.User{Name: user}}}
-
-		mockReq.On("BuildURL", "node", id, "user").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*nodes.NodeResponse")).Run(func(args mock.Arguments) {
-			resp := args.Get(2).(*NodeResponse) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
-			*resp = fakeResp
-		}).Return(nil)
-
-		resp, err := n.UpdateUser(ctx, id, user)
-		require.NoError(t, err)
-		assert.Equal(t, fakeResp, resp)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		n := &NodeResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		user := "newuser"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "node", id, "user").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		resp, err := n.UpdateUser(ctx, id, user)
-		require.Error(t, err)
-		assert.Empty(t, resp.Node)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		n := &NodeResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		user := "newuser"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "node", id, "user").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*nodes.NodeResponse")).Return(errors.New("do error"))
-
-		resp, err := n.UpdateUser(ctx, id, user)
 		require.Error(t, err)
 		assert.Empty(t, resp.Node)
 		mockReq.AssertExpectations(t)

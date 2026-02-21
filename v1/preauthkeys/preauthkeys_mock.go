@@ -12,8 +12,8 @@ type MockPreAuthKeyResource struct {
 }
 
 // List returns a mock list of pre-auth keys from the Headscale.
-func (m *MockPreAuthKeyResource) List(ctx context.Context, filter PreAuthKeyListFilter) (PreAuthKeysResponse, error) {
-	args := m.Called(ctx, filter)
+func (m *MockPreAuthKeyResource) List(ctx context.Context) (PreAuthKeysResponse, error) {
+	args := m.Called(ctx)
 	return args.Get(0).(PreAuthKeysResponse), args.Error(1) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
 }
 
@@ -24,7 +24,13 @@ func (m *MockPreAuthKeyResource) Create(ctx context.Context, createPreAuthKeyReq
 }
 
 // Expire expires a mock pre-auth key from the Headscale.
-func (m *MockPreAuthKeyResource) Expire(ctx context.Context, user string, key string) error {
-	args := m.Called(ctx, user, key)
+func (m *MockPreAuthKeyResource) Expire(ctx context.Context, id string) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
+// Delete deletes a mock pre-auth key from the Headscale.
+func (m *MockPreAuthKeyResource) Delete(ctx context.Context, id string) error {
+	args := m.Called(ctx, id)
 	return args.Error(0)
 }
