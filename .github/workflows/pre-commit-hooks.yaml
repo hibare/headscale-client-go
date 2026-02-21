@@ -7,7 +7,6 @@ on:
     branches:
       - "main"
 
-# We're basically using the same steps as here - https://github.com/pre-commit/action/blob/main/action.yml
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
@@ -23,25 +22,11 @@ jobs:
         with:
           go-version: "stable"
 
-      - name: Cache golangci-lint
-        uses: actions/cache@v5.0.3
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
         with:
-          path: ~/.cache/golangci-lint
-          key: golangci-lint-2.0.2
-
-      - name: Ensure golangci-lint is installed
-        run: |
-          set -e
-          export GOLANGCI_LINT_VERSION=v2.0.2
-          export GOLANGCI_LINT_BIN="$HOME/.cache/golangci-lint/golangci-lint"
-          if [ -x "$GOLANGCI_LINT_BIN" ]; then
-            echo "golangci-lint found in cache."
-          else
-            echo "golangci-lint not found in cache, installing with curl..."
-            mkdir -p "$HOME/.cache/golangci-lint"
-            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$HOME/.cache/golangci-lint" $GOLANGCI_LINT_VERSION
-          fi
-          echo "$HOME/.cache/golangci-lint" >> $GITHUB_PATH
+          install-only: true
+          version: latest
 
       - name: Cache pre-commit
         uses: actions/cache@b45623637f5737c8022070213e69ba8fd6dfe041 # v5.0.2
