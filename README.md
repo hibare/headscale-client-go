@@ -7,8 +7,6 @@ _A Go client for the [Headscale](https://headscale.net) HTTP API._
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/tailscale/tailscale-client-go/v2.svg)](https://pkg.go.dev/github.com/hibare/headscale-client-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hibare/headscale-client-go)](https://goreportcard.com/report/github.com/hibare/headscale-client-go)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhibare%2Fheadscale-client-go.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhibare%2Fheadscale-client-go?ref=badge_shield&issueType=license)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhibare%2Fheadscale-client-go.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhibare%2Fheadscale-client-go?ref=badge_shield&issueType=security)
 
 </div>
 

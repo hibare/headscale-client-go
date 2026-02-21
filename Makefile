@@ -31,6 +31,14 @@ install-pre-commit: ## Install pre-commit
 test: ## Run the tests
 	go test -v ./... -cover
 
+.PHONY: e2e-test
+e2e-test: ## Run E2E tests (requires Docker)
+	cd e2e && go test -v -timeout 10m ./...
+
+.PHONY: e2e-test-race
+e2e-test-race: ## Run E2E tests with race detection (requires Docker)
+	cd e2e && go test -v -race -timeout 12m ./...
+
 .PHONY: help
 help: ## Display this help
 		@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(BCYAN)%-25s$(NC)%s\n", $$1, $$2}'
