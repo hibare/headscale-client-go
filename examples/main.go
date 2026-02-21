@@ -1,3 +1,4 @@
+// Package main provides an example usage of the headscale-client-go library.
 package main
 
 import (
@@ -5,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/hibare/headscale-client-go/logger"
 	"github.com/hibare/headscale-client-go/utils"
@@ -13,6 +15,7 @@ import (
 )
 
 var hsClientNewClient = hsClient.NewClient
+var stdout = os.Stdout
 
 func listNodes(client hsClient.ClientInterface) (string, error) {
 	ns, err := client.Nodes().List(context.Background(), nodes.NodeListFilter{})
@@ -20,9 +23,11 @@ func listNodes(client hsClient.ClientInterface) (string, error) {
 		return "", err
 	}
 	result := ""
+	var resultSb23 strings.Builder
 	for _, node := range ns.Nodes {
-		result += fmt.Sprintf("Node: %+v\n", node)
+		fmt.Fprintf(&resultSb23, "Node: %+v\n", node)
 	}
+	result += resultSb23.String()
 	return result, nil
 }
 
@@ -38,10 +43,10 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("Listing Nodes")
+	_, _ = fmt.Fprintln(stdout, "Listing Nodes")
 	output, err := listNodes(client)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print(output)
+	_, _ = fmt.Fprint(stdout, output)
 }

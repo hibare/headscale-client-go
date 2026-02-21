@@ -82,11 +82,16 @@ func (p *PreAuthKeyResource) Create(ctx context.Context, createPreAuthKeyRequest
 	return key, err
 }
 
+// ExpirePreAuthKeyRequest represents a request to expire a pre-auth key.
+type ExpirePreAuthKeyRequest struct {
+	ID string `json:"id"`
+}
+
 // Expire expires a pre-auth key in Headscale.
 func (p *PreAuthKeyResource) Expire(ctx context.Context, id string) error {
 	url := p.R.BuildURL("preauthkey", "expire")
 	req, err := p.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
-		Body: map[string]string{"id": id},
+		Body: ExpirePreAuthKeyRequest{ID: id},
 	})
 	if err != nil {
 		return err
