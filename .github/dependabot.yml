@@ -32,3 +32,20 @@ updates:
       go:
         patterns:
           - "*"
+
+  # Maintain dependencies for Go mods in e2e
+  - package-ecosystem: "gomod"
+    directory: "/e2e"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "00:30"
+    target-branch: "main"
+    assignees:
+      - "hibare"
+    allow:
+      - dependency-type: "direct"
+    groups:
+      go:
+        patterns:
+          - "*"
