@@ -1,4 +1,4 @@
-name: Pre-commit hooks
+name: Checks
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ on:
       - "main"
 
 jobs:
-  pre-commit:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
