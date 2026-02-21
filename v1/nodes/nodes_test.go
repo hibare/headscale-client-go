@@ -484,19 +484,18 @@ func TestNodeResource_BackFillIP(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
-		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 		fakeResp := BackfillIPsResponse{Changes: []string{"ip1", "ip2"}}
 
-		mockReq.On("BuildURL", "node", id, "backfill_ip").Return(fakeURL)
+		mockReq.On("BuildURL", "node", "backfillips").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
 		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*nodes.BackfillIPsResponse")).Run(func(args mock.Arguments) {
 			resp := args.Get(2).(*BackfillIPsResponse) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
 			*resp = fakeResp
 		}).Return(nil)
 
-		resp, err := n.BackFillIP(ctx, id)
+		resp, err := n.BackFillIP(ctx, true)
 		require.NoError(t, err)
 		assert.Equal(t, fakeResp, resp)
 		mockReq.AssertExpectations(t)
@@ -506,14 +505,13 @@ func TestNodeResource_BackFillIP(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
-		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
-		mockReq.On("BuildURL", "node", id, "backfill_ip").Return(fakeURL)
+		mockReq.On("BuildURL", "node", "backfillips").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
 
-		resp, err := n.BackFillIP(ctx, id)
+		resp, err := n.BackFillIP(ctx, true)
 		require.Error(t, err)
 		assert.Empty(t, resp.Changes)
 		mockReq.AssertExpectations(t)
@@ -523,15 +521,14 @@ func TestNodeResource_BackFillIP(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		n := &NodeResource{R: mockReq}
 		ctx := t.Context()
-		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
-		mockReq.On("BuildURL", "node", id, "backfill_ip").Return(fakeURL)
+		mockReq.On("BuildURL", "node", "backfillips").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
 		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*nodes.BackfillIPsResponse")).Return(errors.New("do error"))
 
-		resp, err := n.BackFillIP(ctx, id)
+		resp, err := n.BackFillIP(ctx, true)
 		require.Error(t, err)
 		assert.Empty(t, resp.Changes)
 		mockReq.AssertExpectations(t)

@@ -12,9 +12,6 @@ _A Go client for the [Headscale](https://headscale.net) HTTP API._
 
 </div>
 
-> [!CAUTION]
-> This project is under active development and may not yet be stable. If you encounter any issues, please open an issue report.
-
 ## Features
 
 - Manage **API Keys**: List, create, expire, and delete API keys.

@@ -16,7 +16,6 @@ type APIKeyResourceInterface interface {
 	Expire(ctx context.Context, prefix string) error
 	ExpireByID(ctx context.Context, id string) error
 	Delete(ctx context.Context, prefix string) error
-	DeleteByID(ctx context.Context, id string) error
 }
 
 // APIKey represents an API key in Headscale.
@@ -115,19 +114,6 @@ func (a *APIKeyResource) ExpireByID(ctx context.Context, id string) error {
 func (a *APIKeyResource) Delete(ctx context.Context, prefix string) error {
 	url := a.R.BuildURL("apikey", prefix)
 	req, err := a.R.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{})
-	if err != nil {
-		return err
-	}
-
-	return a.R.Do(ctx, req, nil)
-}
-
-// DeleteByID removes an API key by ID from the Headscale.
-func (a *APIKeyResource) DeleteByID(ctx context.Context, id string) error {
-	url := a.R.BuildURL("apikey", "-")
-	req, err := a.R.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{
-		QueryParams: map[string]any{"id": id},
-	})
 	if err != nil {
 		return err
 	}

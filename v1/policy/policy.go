@@ -43,7 +43,7 @@ func (p *PolicyResource) Get(ctx context.Context) (Policy, error) {
 
 // UpdatePolicyResponse represents a response from the update policy endpoint.
 type UpdatePolicyResponse struct {
-	Policy    Policy `json:"policy"`
+	Policy    string `json:"policy"`
 	UpdatedAt string `json:"updatedAt"`
 }
 

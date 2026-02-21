@@ -40,9 +40,3 @@ func (m *MockAPIKeyResource) Delete(ctx context.Context, prefix string) error {
 	args := m.Called(ctx, prefix)
 	return args.Error(0)
 }
-
-// DeleteByID deletes a mock API key by ID from the Headscale.
-func (m *MockAPIKeyResource) DeleteByID(ctx context.Context, id string) error {
-	args := m.Called(ctx, id)
-	return args.Error(0)
-}

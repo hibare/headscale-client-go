@@ -21,7 +21,7 @@ type NodeResourceInterface interface {
 	Expire(ctx context.Context, id string) error
 	Rename(ctx context.Context, id, name string) (NodeResponse, error)
 	AddTags(ctx context.Context, id string, tags []string) (NodeResponse, error)
-	BackFillIP(ctx context.Context, id string) (BackfillIPsResponse, error)
+	BackFillIP(ctx context.Context, confirm bool) (BackfillIPsResponse, error)
 }
 
 // Node represents a node in Headscale.
@@ -205,10 +205,12 @@ type BackfillIPsResponse struct {
 	Changes []string `json:"changes"`
 }
 
-// BackFillIP backfills the IP address for a node in the Headscale.
-func (n *NodeResource) BackFillIP(ctx context.Context, id string) (BackfillIPsResponse, error) {
-	url := n.R.BuildURL("node", id, "backfill_ip")
-	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
+// BackFillIP backfills the IP address for nodes in Headscale.
+func (n *NodeResource) BackFillIP(ctx context.Context, confirm bool) (BackfillIPsResponse, error) {
+	url := n.R.BuildURL("node", "backfillips")
+	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+		QueryParams: map[string]any{"confirmed": confirm},
+	})
 	if err != nil {
 		return BackfillIPsResponse{}, err
 	}

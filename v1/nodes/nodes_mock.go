@@ -53,8 +53,8 @@ func (m *MockNodeResource) AddTags(ctx context.Context, id string, tags []string
 	return args.Get(0).(NodeResponse), args.Error(1) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
 }
 
-// BackFillIP backfills the IP of a mock node from the Headscale.
-func (m *MockNodeResource) BackFillIP(ctx context.Context, id string) (BackfillIPsResponse, error) {
-	args := m.Called(ctx, id)
+// BackFillIP backfills the IP address for a mock node from the Headscale.
+func (m *MockNodeResource) BackFillIP(ctx context.Context, confirm bool) (BackfillIPsResponse, error) {
+	args := m.Called(ctx, confirm)
 	return args.Get(0).(BackfillIPsResponse), args.Error(1) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
 }
