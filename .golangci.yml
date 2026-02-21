@@ -190,6 +190,11 @@ linters:
         - G704 # SSRF - This is an HTTP client library, making requests to user-configured URLs is expected
         - G117 # API key field names - These are response fields containing generated keys, not hardcoded secrets
 
+    gomoddirectives:
+      replace-allow-list:
+        - github.com/hibare/headscale-client-go
+      replace-local: true
+
     revive:
       rules:
         - name: var-naming
