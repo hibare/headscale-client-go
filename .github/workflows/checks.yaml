@@ -31,21 +31,8 @@ jobs:
           install-only: true
           version: latest
 
-      - name: Cache pre-commit
-        uses: actions/cache@b45623637f5737c8022070213e69ba8fd6dfe041 # v5.0.2
-        with:
-          path: ~/.cache/pre-commit
-          key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
-
-      - name: Install pre-commit
-        run: python -m pip install pre-commit
-
-      - name: Run pre-commit
-        run: pre-commit run --all-files --show-diff-on-failure --color=always
-        shell: bash
-
-      - name: Run golangci-lint
-        run: golangci-lint run --fix
+      - name: Run pre-commit hooks
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
 
   e2e-tests:
     runs-on: ubuntu-latest
