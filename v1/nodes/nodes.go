@@ -57,8 +57,6 @@ type NodeResponse struct {
 }
 
 // NodesResponse represents a list of nodes response from the API.
-//
-//nolint:revive // This is a struct for a response from the API.
 type NodesResponse struct {
 	Nodes []Node `json:"nodes"`
 }

@@ -32,8 +32,6 @@ type PreAuthKey struct {
 }
 
 // PreAuthKeysResponse represents a list of pre-auth keys response from the API.
-//
-//nolint:revive // This is a struct for a response from the API.
 type PreAuthKeysResponse struct {
 	PreAuthKeys []PreAuthKey `json:"preAuthKeys"`
 }

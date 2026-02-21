@@ -23,8 +23,6 @@ var (
 )
 
 // ClientInterface defines the methods that a Headscale client must implement.
-//
-//nolint:revive // Name is intentionally to avoid confusions
 type ClientInterface interface {
 	APIKeys() apikeys.APIKeyResourceInterface
 	Nodes() nodes.NodeResourceInterface
@@ -68,8 +66,6 @@ func (c *Client) PreAuthKeys() preauthkeys.PreAuthKeyResourceInterface {
 }
 
 // ClientOptions contains options for the Headscale client.
-//
-//nolint:revive // Name is intentionally to avoid confusions
 type ClientOptions struct {
 	HTTPClient *http.Client
 	UserAgent  *string

@@ -28,8 +28,6 @@ type APIKey struct {
 }
 
 // APIKeysResponse represents a single API key response from the API.
-//
-//nolint:revive // This is a struct for a response from the API.
 type APIKeysResponse struct {
 	APIKeys []APIKey `json:"apiKeys"`
 }

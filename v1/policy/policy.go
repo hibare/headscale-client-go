@@ -9,8 +9,6 @@ import (
 )
 
 // PolicyResourceInterface is an interface for managing policies in Headscale.
-//
-//nolint:revive // This is an interface for the policy resource.
 type PolicyResourceInterface interface {
 	Get(ctx context.Context) (Policy, error)
 	Update(ctx context.Context, policy string) (UpdatePolicyResponse, error)
@@ -66,8 +64,6 @@ func (p *PolicyResource) Update(ctx context.Context, policy string) (UpdatePolic
 }
 
 // PolicyResource is a struct that implements the PolicyResourceInterface.
-//
-//nolint:revive // This is a resource for the policy.
 type PolicyResource struct {
 	R requests.RequestInterface
 }
