@@ -30,8 +30,6 @@ type User struct {
 }
 
 // UsersResponse represents a single user response from the API.
-//
-//nolint:revive // This is a struct for a response from the API.
 type UsersResponse struct {
 	Users []User `json:"users"`
 }

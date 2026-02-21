@@ -5,8 +5,8 @@ import (
 
 	"github.com/hibare/headscale-client-go/v1/client"
 	"github.com/hibare/headscale-client-go/v1/nodes"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestListNodes(t *testing.T) {
@@ -22,9 +22,9 @@ func TestListNodes(t *testing.T) {
 	clientMock.On("Nodes").Return(nodeMock)
 
 	output, err := listNodes(clientMock)
-	assert.NoError(t, err)
-	assert.Contains(t, output, "ID:1")
-	assert.Contains(t, output, "Name:testnode")
+	require.NoError(t, err)
+	require.Contains(t, output, "ID:1")
+	require.Contains(t, output, "Name:testnode")
 	clientMock.AssertExpectations(t)
 	nodeMock.AssertExpectations(t)
 }

@@ -128,6 +128,7 @@ func TestAPIKeyResource_Create(t *testing.T) {
 	})
 }
 
+//nolint:dupl // Test code is intentionally similar for consistency
 func TestAPIKeyResource_Expire(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockReq := new(requests.MockRequest)
@@ -227,6 +228,59 @@ func TestAPIKeyResource_Delete(t *testing.T) {
 		mockReq.On("Do", ctx, fakeReq, nil).Return(errors.New("do error"))
 
 		err := a.Delete(ctx, prefix)
+		require.Error(t, err)
+		mockReq.AssertExpectations(t)
+	})
+}
+
+//nolint:dupl // Test code is intentionally similar for consistency
+func TestAPIKeyResource_ExpireByID(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		mockReq := new(requests.MockRequest)
+		a := &APIKeyResource{R: mockReq}
+		ctx := t.Context()
+		id := "1"
+		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
+		fakeReq := &http.Request{}
+
+		mockReq.On("BuildURL", "apikey", "expire").Return(fakeURL)
+		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
+		mockReq.On("Do", ctx, fakeReq, nil).Return(nil)
+
+		err := a.ExpireByID(ctx, id)
+		require.NoError(t, err)
+		mockReq.AssertExpectations(t)
+	})
+
+	t.Run("build request error", func(t *testing.T) {
+		mockReq := new(requests.MockRequest)
+		a := &APIKeyResource{R: mockReq}
+		ctx := t.Context()
+		id := "1"
+		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
+		fakeReq := &http.Request{}
+
+		mockReq.On("BuildURL", "apikey", "expire").Return(fakeURL)
+		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
+
+		err := a.ExpireByID(ctx, id)
+		require.Error(t, err)
+		mockReq.AssertExpectations(t)
+	})
+
+	t.Run("do error", func(t *testing.T) {
+		mockReq := new(requests.MockRequest)
+		a := &APIKeyResource{R: mockReq}
+		ctx := t.Context()
+		id := "1"
+		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
+		fakeReq := &http.Request{}
+
+		mockReq.On("BuildURL", "apikey", "expire").Return(fakeURL)
+		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
+		mockReq.On("Do", ctx, fakeReq, nil).Return(errors.New("do error"))
+
+		err := a.ExpireByID(ctx, id)
 		require.Error(t, err)
 		mockReq.AssertExpectations(t)
 	})

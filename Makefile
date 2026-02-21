@@ -32,5 +32,5 @@ test: ## Run the tests
 	go test -v ./... -cover
 
 .PHONY: help
-help: ## Disply this help
+help: ## Display this help
 		@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(BCYAN)%-25s$(NC)%s\n", $$1, $$2}'

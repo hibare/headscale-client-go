@@ -77,7 +77,7 @@ func TestPolicyResource_Update(t *testing.T) {
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 		fakeResp := UpdatePolicyResponse{
-			Policy:    Policy{Policy: policyStr, UpdatedAt: "2024-01-01T00:00:00Z"},
+			Policy:    policyStr,
 			UpdatedAt: "2024-01-01T00:00:00Z",
 		}
 
@@ -107,7 +107,7 @@ func TestPolicyResource_Update(t *testing.T) {
 
 		resp, err := p.Update(ctx, policyStr)
 		require.Error(t, err)
-		assert.Empty(t, resp.Policy.Policy)
+		assert.Empty(t, resp.Policy)
 		mockReq.AssertExpectations(t)
 	})
 
@@ -125,7 +125,7 @@ func TestPolicyResource_Update(t *testing.T) {
 
 		resp, err := p.Update(ctx, policyStr)
 		require.Error(t, err)
-		assert.Empty(t, resp.Policy.Policy)
+		assert.Empty(t, resp.Policy)
 		mockReq.AssertExpectations(t)
 	})
 }

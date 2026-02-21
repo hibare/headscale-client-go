@@ -19,7 +19,6 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
-		filter := PreAuthKeyListFilter{User: 1}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 		fakeResp := PreAuthKeysResponse{PreAuthKeys: []PreAuthKey{{ID: "1", User: users.User{ID: "u1", Name: "testuser"}}}}
@@ -31,20 +30,9 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 			*resp = fakeResp
 		}).Return(nil)
 
-		resp, err := p.List(ctx, filter)
+		resp, err := p.List(ctx)
 		require.NoError(t, err)
 		assert.Equal(t, fakeResp, resp)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("no user", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		filter := PreAuthKeyListFilter{}
-		resp, err := p.List(ctx, filter)
-		require.Error(t, err)
-		assert.Empty(t, resp.PreAuthKeys)
 		mockReq.AssertExpectations(t)
 	})
 
@@ -52,14 +40,13 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
-		filter := PreAuthKeyListFilter{User: 1}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
 		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodGet, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
 
-		resp, err := p.List(ctx, filter)
+		resp, err := p.List(ctx)
 		require.Error(t, err)
 		assert.Empty(t, resp.PreAuthKeys)
 		mockReq.AssertExpectations(t)
@@ -69,7 +56,6 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
-		filter := PreAuthKeyListFilter{User: 1}
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
@@ -77,7 +63,7 @@ func TestPreAuthKeyResource_List(t *testing.T) {
 		mockReq.On("BuildRequest", ctx, http.MethodGet, fakeURL, mock.Anything).Return(fakeReq, nil)
 		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*preauthkeys.PreAuthKeysResponse")).Return(errors.New("do error"))
 
-		resp, err := p.List(ctx, filter)
+		resp, err := p.List(ctx)
 		require.Error(t, err)
 		assert.Empty(t, resp.PreAuthKeys)
 		mockReq.AssertExpectations(t)
@@ -168,8 +154,7 @@ func TestPreAuthKeyResource_Expire(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
-		user := "testuser"
-		key := "key1"
+		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
@@ -177,7 +162,7 @@ func TestPreAuthKeyResource_Expire(t *testing.T) {
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
 		mockReq.On("Do", ctx, fakeReq, nil).Return(nil)
 
-		err := p.Expire(ctx, user, key)
+		err := p.Expire(ctx, id)
 		require.NoError(t, err)
 		mockReq.AssertExpectations(t)
 	})
@@ -186,15 +171,14 @@ func TestPreAuthKeyResource_Expire(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
-		user := "testuser"
-		key := "key1"
+		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
 		mockReq.On("BuildURL", "preauthkey", "expire").Return(fakeURL)
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
 
-		err := p.Expire(ctx, user, key)
+		err := p.Expire(ctx, id)
 		require.Error(t, err)
 		mockReq.AssertExpectations(t)
 	})
@@ -203,8 +187,7 @@ func TestPreAuthKeyResource_Expire(t *testing.T) {
 		mockReq := new(requests.MockRequest)
 		p := &PreAuthKeyResource{R: mockReq}
 		ctx := t.Context()
-		user := "testuser"
-		key := "key1"
+		id := "1"
 		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
 		fakeReq := &http.Request{}
 
@@ -212,7 +195,59 @@ func TestPreAuthKeyResource_Expire(t *testing.T) {
 		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
 		mockReq.On("Do", ctx, fakeReq, nil).Return(errors.New("do error"))
 
-		err := p.Expire(ctx, user, key)
+		err := p.Expire(ctx, id)
+		require.Error(t, err)
+		mockReq.AssertExpectations(t)
+	})
+}
+
+func TestPreAuthKeyResource_Delete(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		mockReq := new(requests.MockRequest)
+		p := &PreAuthKeyResource{R: mockReq}
+		ctx := t.Context()
+		id := "1"
+		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
+		fakeReq := &http.Request{}
+
+		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
+		mockReq.On("BuildRequest", ctx, http.MethodDelete, fakeURL, mock.Anything).Return(fakeReq, nil)
+		mockReq.On("Do", ctx, fakeReq, nil).Return(nil)
+
+		err := p.Delete(ctx, id)
+		require.NoError(t, err)
+		mockReq.AssertExpectations(t)
+	})
+
+	t.Run("build request error", func(t *testing.T) {
+		mockReq := new(requests.MockRequest)
+		p := &PreAuthKeyResource{R: mockReq}
+		ctx := t.Context()
+		id := "1"
+		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
+		fakeReq := &http.Request{}
+
+		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
+		mockReq.On("BuildRequest", ctx, http.MethodDelete, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
+
+		err := p.Delete(ctx, id)
+		require.Error(t, err)
+		mockReq.AssertExpectations(t)
+	})
+
+	t.Run("do error", func(t *testing.T) {
+		mockReq := new(requests.MockRequest)
+		p := &PreAuthKeyResource{R: mockReq}
+		ctx := t.Context()
+		id := "1"
+		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
+		fakeReq := &http.Request{}
+
+		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
+		mockReq.On("BuildRequest", ctx, http.MethodDelete, fakeURL, mock.Anything).Return(fakeReq, nil)
+		mockReq.On("Do", ctx, fakeReq, nil).Return(errors.New("do error"))
+
+		err := p.Delete(ctx, id)
 		require.Error(t, err)
 		mockReq.AssertExpectations(t)
 	})

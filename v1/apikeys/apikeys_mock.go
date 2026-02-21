@@ -29,6 +29,12 @@ func (m *MockAPIKeyResource) Expire(ctx context.Context, prefix string) error {
 	return args.Error(0)
 }
 
+// ExpireByID expires a mock API key by ID from the Headscale.
+func (m *MockAPIKeyResource) ExpireByID(ctx context.Context, id string) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
 // Delete deletes a mock API key from the Headscale.
 func (m *MockAPIKeyResource) Delete(ctx context.Context, prefix string) error {
 	args := m.Called(ctx, prefix)

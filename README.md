@@ -12,9 +12,6 @@ _A Go client for the [Headscale](https://headscale.net) HTTP API._
 
 </div>
 
-> [!CAUTION]
-> This project is under active development and may not yet be stable. If you encounter any issues, please open an issue report.
-
 ## Features
 
 - Manage **API Keys**: List, create, expire, and delete API keys.
@@ -29,7 +26,7 @@ _A Go client for the [Headscale](https://headscale.net) HTTP API._
 
 ## Installation
 
-Requires **Go 1.24+** and **Headscale v0.26.0** & above.
+Requires **Go 1.26+** and **Headscale v0.28.0** & above.
 
 ```sh
 go get github.com/hibare/headscale-client-go
@@ -58,20 +55,27 @@ Each resource provides methods for CRUD and management operations. See [pkg.go.d
 ## Development & Contributing
 
 - **Run tests:**
+
   ```sh
   make test
   ```
+
 - **Lint:**
+
   ```sh
   make install-golangci-lint
   golangci-lint run
   ```
+
 - **Pre-commit hooks:**
+
   ```sh
   make install-pre-commit
   pre-commit run --all-files
   ```
+
 - **Formatting:**
+
   ```sh
   go fmt ./...
   ```
