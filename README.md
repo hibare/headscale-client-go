@@ -1,30 +1,35 @@
 <div align="center">
-  <img src="./assets/logo.png" alt="headscale-cleint-go Logo" width="200" height="200">
+  <img src="./assets/logo.png" alt="headscale-client-go Logo" width="200" height="200">
 
 # Headscale Client Go
 
 _A Go client for the [Headscale](https://headscale.net) HTTP API._
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/tailscale/tailscale-client-go/v2.svg)](https://pkg.go.dev/github.com/hibare/headscale-client-go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/hibare/headscale-client-go.svg)](https://pkg.go.dev/github.com/hibare/headscale-client-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hibare/headscale-client-go)](https://goreportcard.com/report/github.com/hibare/headscale-client-go)
 
 </div>
 
 ## Features
 
-- Manage **API Keys**: List, create, expire, and delete API keys.
-- Manage **Nodes**: List, get, register, delete, expire, rename, tag, update user, and backfill IPs for nodes.
-- Manage **Users**: List, create, delete, and rename users.
-- Manage **Policies**: Get and update policy documents.
-- Manage **Pre-Auth Keys**: List, create, and expire pre-auth keys.
+- **API Keys**: List, create, expire, and delete API keys (by prefix or ID).
+- **Nodes**: List, get, register, delete, expire, rename, tag, and backfill IPs.
+- **Users**: List, create, delete, and rename users.
+- **Policies**: Get and update policy documents.
+- **Pre-Auth Keys**: List, create, expire, and delete pre-auth keys.
 - Customizable HTTP client, user agent, and logger support.
 - Idiomatic Go API with context support.
 
 ---
 
-## Installation
+## Requirements
 
-Requires **Go 1.26+** and **Headscale v0.28.0** & above.
+- **Go**: 1.26+
+- **Headscale**: v0.28.0+
+
+---
+
+## Installation
 
 ```sh
 go get github.com/hibare/headscale-client-go
@@ -32,59 +37,87 @@ go get github.com/hibare/headscale-client-go
 
 ---
 
-## Usage
+## Quick Start
 
-See the [`examples/`](examples/) directory for usage examples.
+```go
+package main
 
-### API Overview
+import (
+    "context"
+    "fmt"
 
-The client exposes resource interfaces for each Headscale API resource:
+    hsClient "github.com/hibare/headscale-client-go/v1/client"
+    "github.com/hibare/headscale-client-go/v1/nodes"
+)
 
-- `client.APIKeys()` – Manage API keys
-- `client.Nodes()` – Manage nodes
-- `client.Users()` – Manage users
-- `client.Policy()` – Manage policy
-- `client.PreAuthKeys()` – Manage pre-auth keys
+func main() {
+    // Create client
+    client, err := hsClient.NewClient(
+        "http://headscale:8080",
+        "your-api-key",
+        hsClient.ClientOptions{},
+    )
+    if err != nil {
+        panic(err)
+    }
 
-Each resource provides methods for CRUD and management operations. See [pkg.go.dev](https://pkg.go.dev/github.com/hibare/headscale-client-go) for full API documentation.
+    // List nodes
+    nodeList, err := client.Nodes().List(context.Background(), nodes.NodeListFilter{})
+    if err != nil {
+        panic(err)
+    }
+
+    for _, node := range nodeList.Nodes {
+        fmt.Printf("Node: %s (%s)\n", node.Name, node.ID)
+    }
+}
+```
 
 ---
 
-## Development & Contributing
+## API Overview
 
-- **Run tests:**
+| Resource               | Description          |
+| ---------------------- | -------------------- |
+| `client.APIKeys()`     | Manage API keys      |
+| `client.Nodes()`       | Manage nodes         |
+| `client.Users()`       | Manage users         |
+| `client.Policy()`      | Manage policy        |
+| `client.PreAuthKeys()` | Manage pre-auth keys |
 
-  ```sh
-  make test
-  ```
+For full API documentation, see [pkg.go.dev](https://pkg.go.dev/github.com/hibare/headscale-client-go).
 
-- **Lint:**
+---
 
-  ```sh
-  make install-golangci-lint
-  golangci-lint run
-  ```
+## Examples
 
-- **Pre-commit hooks:**
+See the [`examples/`](examples/) directory for more usage examples.
 
-  ```sh
-  make install-pre-commit
-  pre-commit run --all-files
-  ```
+---
 
-- **Formatting:**
+## Development
 
-  ```sh
-  go fmt ./...
-  ```
+```sh
+# Run tests
+make test
 
-Contributions are welcome! Please open issues or pull requests.
+# Run E2E tests (requires Docker)
+make e2e-test
+
+# Lint
+golangci-lint run
+
+# Format
+go fmt ./...
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
 
 ---
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
