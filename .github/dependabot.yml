@@ -49,3 +49,8 @@ updates:
       go:
         patterns:
           - "*"
+
+  - package-ecosystem: gomod
+    directory: /examples
+    schedule:
+      interval: weekly
