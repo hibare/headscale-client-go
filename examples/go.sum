@@ -1,7 +1,7 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/hibare/headscale-client-go v0.3.0 h1:8YYKlPFuEnYLyVXBLDhrXpsr4BAlz+pGvEcoCbwnZmk=
-github.com/hibare/headscale-client-go v0.3.0/go.mod h1:jzcIYGjwsbnt8fdsK2jHiver/pufeLEIv50y8Q/Vrkk=
+github.com/hibare/headscale-client-go v0.7.0 h1:czQK6AhhTArJFDRK7a3ojF1UTObxMQZ2s5H8VWvxZqo=
+github.com/hibare/headscale-client-go v0.7.0/go.mod h1:+AAm506t5+XZY+mM9dM700sQ10oLKLVkH7xGafeGHUc=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.5.2 h1:xuMeJ0Sdp5ZMRXx/aWO6RZxdr3beISkG5/G/aIRr3pY=
