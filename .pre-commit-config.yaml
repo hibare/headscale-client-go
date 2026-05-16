@@ -1,6 +1,8 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files
       - id: check-json
@@ -12,7 +14,7 @@ repos:
       - id: check-shebang-scripts-are-executable
 
   - repo: https://github.com/tekwizely/pre-commit-golang
-    rev: f298c082154b2cb239fac06a4f452368e66e66dd # v1.0.0-rc.4
+    rev: v1.0.0-rc.4
     hooks:
       - id: go-mod-tidy
       - id: go-fmt
