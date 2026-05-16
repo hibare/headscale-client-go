@@ -4,7 +4,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       day: "friday"
       time: "00:30"
     target-branch: "main"
@@ -19,7 +19,7 @@ updates:
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       day: "friday"
       time: "00:30"
     target-branch: "main"
@@ -37,7 +37,7 @@ updates:
   - package-ecosystem: "gomod"
     directory: "/e2e"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       day: "friday"
       time: "00:30"
     target-branch: "main"
