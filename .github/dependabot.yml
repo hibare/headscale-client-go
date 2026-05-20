@@ -8,6 +8,8 @@ updates:
       day: "friday"
       time: "00:30"
     target-branch: "main"
+    cooldown:
+      default-days: 10
     assignees:
       - "hibare"
     groups:
@@ -23,6 +25,8 @@ updates:
       day: "friday"
       time: "00:30"
     target-branch: "main"
+    cooldown:
+      default-days: 10
     assignees:
       - "hibare"
     allow:
@@ -41,6 +45,8 @@ updates:
       day: "friday"
       time: "00:30"
     target-branch: "main"
+    cooldown:
+      default-days: 10
     assignees:
       - "hibare"
     allow:
