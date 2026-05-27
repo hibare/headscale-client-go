@@ -43,7 +43,7 @@ jobs:
           version: latest
 
       - name: Run pre-commit hooks
-        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+        uses: hibare/.github/github/shared-workflows/pre-commit//@ec61c90a75c7438d3fa683fffffd83908d1e7447 # v0.10.0
 
   e2e-tests:
     runs-on: ubuntu-latest
