@@ -21,7 +21,7 @@ jobs:
     if: github.event_name != 'schedule'
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -37,7 +37,7 @@ jobs:
           go-version-file: go.mod
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9.2.1
         with:
           install-only: true
           version: latest
@@ -50,7 +50,7 @@ jobs:
     if: github.event_name == 'schedule'
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -71,7 +71,7 @@ jobs:
     if: github.event_name != 'schedule'
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
