@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 
@@ -22,12 +23,14 @@ type requestRecord struct {
 }
 
 func TestClient_HTTPRequests(t *testing.T) {
+	var mu sync.Mutex
 	var requests []requestRecord
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
 		_ = r.Body.Close()
 
+		mu.Lock()
 		requests = append(requests, requestRecord{
 			Method: r.Method,
 			Path:   r.URL.Path,
@@ -35,6 +38,7 @@ func TestClient_HTTPRequests(t *testing.T) {
 			Body:   string(body),
 			Header: r.Header.Clone(),
 		})
+		mu.Unlock()
 
 		w.Header().Set("Content-Type", "application/json")
 
@@ -58,70 +62,90 @@ func TestClient_HTTPRequests(t *testing.T) {
 
 	client, err := NewClient(srv.URL, "test-api-key", ClientOptions{})
 	require.NoError(t, err)
+
+	getRequests := func() []requestRecord {
+		mu.Lock()
+		defer mu.Unlock()
+		out := make([]requestRecord, len(requests))
+		copy(out, requests)
+		return out
+	}
+
+	resetRequests := func() {
+		mu.Lock()
+		defer mu.Unlock()
+		requests = nil
+	}
+
 	t.Run("APIKeys.List", func(t *testing.T) {
 		ctx := t.Context()
-		requests = nil
+		resetRequests()
 		_, listErr := client.APIKeys().List(ctx)
 		require.NoError(t, listErr)
-		require.Len(t, requests, 1)
-		assert.Equal(t, http.MethodGet, requests[0].Method)
-		assert.Equal(t, "/api/v1/apikey", requests[0].Path)
-		assert.Empty(t, requests[0].Query)
-		assert.Empty(t, requests[0].Body)
-		assert.Contains(t, requests[0].Header.Get("Authorization"), "Bearer test-api-key")
+		reqs := getRequests()
+		require.Len(t, reqs, 1)
+		assert.Equal(t, http.MethodGet, reqs[0].Method)
+		assert.Equal(t, "/api/v1/apikey", reqs[0].Path)
+		assert.Empty(t, reqs[0].Query)
+		assert.Empty(t, reqs[0].Body)
+		assert.Contains(t, reqs[0].Header.Get("Authorization"), "Bearer test-api-key")
 	})
 
 	t.Run("Users.List with filter", func(t *testing.T) {
 		ctx := t.Context()
-		requests = nil
+		resetRequests()
 		_, listErr := client.Users().List(ctx, users.UserListFilter{Name: "test"})
 		require.NoError(t, listErr)
-		require.Len(t, requests, 1)
-		assert.Equal(t, http.MethodGet, requests[0].Method)
-		assert.Equal(t, "/api/v1/user", requests[0].Path)
-		assert.Equal(t, "name=test", requests[0].Query)
-		assert.Empty(t, requests[0].Body)
+		reqs := getRequests()
+		require.Len(t, reqs, 1)
+		assert.Equal(t, http.MethodGet, reqs[0].Method)
+		assert.Equal(t, "/api/v1/user", reqs[0].Path)
+		assert.Equal(t, "name=test", reqs[0].Query)
+		assert.Empty(t, reqs[0].Body)
 	})
 
 	t.Run("Nodes.Get", func(t *testing.T) {
 		ctx := t.Context()
-		requests = nil
+		resetRequests()
 		_, getErr := client.Nodes().Get(ctx, "node-1")
 		require.NoError(t, getErr)
-		require.Len(t, requests, 1)
-		assert.Equal(t, http.MethodGet, requests[0].Method)
-		assert.Equal(t, "/api/v1/node/node-1", requests[0].Path)
-		assert.Empty(t, requests[0].Query)
-		assert.Empty(t, requests[0].Body)
+		reqs := getRequests()
+		require.Len(t, reqs, 1)
+		assert.Equal(t, http.MethodGet, reqs[0].Method)
+		assert.Equal(t, "/api/v1/node/node-1", reqs[0].Path)
+		assert.Empty(t, reqs[0].Query)
+		assert.Empty(t, reqs[0].Body)
 	})
 
 	t.Run("Policy.Update", func(t *testing.T) {
 		ctx := t.Context()
-		requests = nil
+		resetRequests()
 		_, updateErr := client.Policy().Update(ctx, `{"acls":[]}`)
 		require.NoError(t, updateErr)
-		require.Len(t, requests, 1)
-		assert.Equal(t, http.MethodPut, requests[0].Method)
-		assert.Equal(t, "/api/v1/policy", requests[0].Path)
-		assert.Empty(t, requests[0].Query)
-		assert.Contains(t, requests[0].Body, `acls`)
+		reqs := getRequests()
+		require.Len(t, reqs, 1)
+		assert.Equal(t, http.MethodPut, reqs[0].Method)
+		assert.Equal(t, "/api/v1/policy", reqs[0].Path)
+		assert.Empty(t, reqs[0].Query)
+		assert.Contains(t, reqs[0].Body, `acls`)
 	})
 
 	t.Run("PreAuthKeys.Create", func(t *testing.T) {
 		ctx := t.Context()
-		requests = nil
+		resetRequests()
 		_, createErr := client.PreAuthKeys().Create(ctx, preauthkeys.CreatePreAuthKeyRequest{
 			User:       "u1",
 			Reusable:   true,
 			Expiration: time.Now().Add(1 * time.Hour),
 		})
 		require.NoError(t, createErr)
-		require.Len(t, requests, 1)
-		assert.Equal(t, http.MethodPost, requests[0].Method)
-		assert.Equal(t, "/api/v1/preauthkey", requests[0].Path)
-		assert.Empty(t, requests[0].Query)
-		assert.Contains(t, requests[0].Body, `"user":"u1"`)
-		assert.Contains(t, requests[0].Body, `"reusable":true`)
-		assert.Contains(t, requests[0].Body, `"expiration"`)
+		reqs := getRequests()
+		require.Len(t, reqs, 1)
+		assert.Equal(t, http.MethodPost, reqs[0].Method)
+		assert.Equal(t, "/api/v1/preauthkey", reqs[0].Path)
+		assert.Empty(t, reqs[0].Query)
+		assert.Contains(t, reqs[0].Body, `"user":"u1"`)
+		assert.Contains(t, reqs[0].Body, `"reusable":true`)
+		assert.Contains(t, reqs[0].Body, `"expiration"`)
 	})
 }
