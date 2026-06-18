@@ -47,14 +47,20 @@ func (m *MockNodeResource) Rename(ctx context.Context, id, name string) (NodeRes
 	return args.Get(0).(NodeResponse), args.Error(1) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
 }
 
+// ApproveRoutes approves routes for a mock node in the Headscale.
+func (m *MockNodeResource) ApproveRoutes(ctx context.Context, id string, routes []string) (NodeResponse, error) {
+	args := m.Called(ctx, id, routes)
+	return args.Get(0).(NodeResponse), args.Error(1) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
+}
+
 // AddTags adds tags to a mock node from the Headscale.
 func (m *MockNodeResource) AddTags(ctx context.Context, id string, tags []string) (NodeResponse, error) {
 	args := m.Called(ctx, id, tags)
 	return args.Get(0).(NodeResponse), args.Error(1) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
 }
 
-// BackFillIP backfills the IP address for a mock node from the Headscale.
-func (m *MockNodeResource) BackFillIP(ctx context.Context, confirm bool) (BackfillIPsResponse, error) {
+// BackfillIPs backfills the IP address for a mock node from the Headscale.
+func (m *MockNodeResource) BackfillIPs(ctx context.Context, confirm bool) (BackfillIPsResponse, error) {
 	args := m.Called(ctx, confirm)
 	return args.Get(0).(BackfillIPsResponse), args.Error(1) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
 }

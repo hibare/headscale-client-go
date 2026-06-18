@@ -22,17 +22,14 @@ const (
 
 	// LevelError is the error log level.
 	LevelError
-
-	// LevelCritical is the critical log level.
-	LevelCritical
 )
 
 // Logger is an interface for logging messages.
 type Logger interface {
-	Info(ctx context.Context, msg string, keysAndValues ...interface{})
-	Error(ctx context.Context, msg string, keysAndValues ...interface{})
-	Warn(ctx context.Context, msg string, keysAndValues ...interface{})
-	Debug(ctx context.Context, msg string, keysAndValues ...interface{})
+	Info(ctx context.Context, msg string, keysAndValues ...any)
+	Error(ctx context.Context, msg string, keysAndValues ...any)
+	Warn(ctx context.Context, msg string, keysAndValues ...any)
+	Debug(ctx context.Context, msg string, keysAndValues ...any)
 }
 
 // DefaultLogger is a simple implementation of the Logger interface.
@@ -59,29 +56,27 @@ func mapLogLevel(level LogLevel) slog.Level {
 		return slog.LevelWarn
 	case LevelError:
 		return slog.LevelError
-	case LevelCritical:
-		return slog.LevelError // Assuming Critical maps to Error for simplicity
 	default:
 		return slog.LevelInfo
 	}
 }
 
-// Info logs an informational message.
-func (l *DefaultLogger) Info(ctx context.Context, msg string, keysAndValues ...interface{}) {
+// Info writes an info-level log entry to stdout in JSON format.
+func (l *DefaultLogger) Info(ctx context.Context, msg string, keysAndValues ...any) {
 	l.logger.InfoContext(ctx, msg, keysAndValues...)
 }
 
-// Error logs an error message.
-func (l *DefaultLogger) Error(ctx context.Context, msg string, keysAndValues ...interface{}) {
+// Error writes an error-level log entry to stdout in JSON format.
+func (l *DefaultLogger) Error(ctx context.Context, msg string, keysAndValues ...any) {
 	l.logger.ErrorContext(ctx, msg, keysAndValues...)
 }
 
-// Warn logs a warning message.
-func (l *DefaultLogger) Warn(ctx context.Context, msg string, keysAndValues ...interface{}) {
+// Warn writes a warning-level log entry to stdout in JSON format.
+func (l *DefaultLogger) Warn(ctx context.Context, msg string, keysAndValues ...any) {
 	l.logger.WarnContext(ctx, msg, keysAndValues...)
 }
 
-// Debug logs a debug message.
-func (l *DefaultLogger) Debug(ctx context.Context, msg string, keysAndValues ...interface{}) {
+// Debug writes a debug-level log entry to stdout in JSON format.
+func (l *DefaultLogger) Debug(ctx context.Context, msg string, keysAndValues ...any) {
 	l.logger.DebugContext(ctx, msg, keysAndValues...)
 }

@@ -18,6 +18,16 @@ type PreAuthKeyResourceInterface interface {
 	Delete(ctx context.Context, id string) error
 }
 
+// PreAuthKeyResource is a struct that implements the PreAuthKeyResourceInterface.
+type PreAuthKeyResource struct {
+	r requests.RequestInterface
+}
+
+// NewPreAuthKeyResource creates a new PreAuthKeyResource.
+func NewPreAuthKeyResource(r requests.RequestInterface) *PreAuthKeyResource {
+	return &PreAuthKeyResource{r: r}
+}
+
 // PreAuthKey represents a pre-auth key in Headscale.
 type PreAuthKey struct {
 	ID         string     `json:"id"`
@@ -40,13 +50,13 @@ type PreAuthKeysResponse struct {
 func (p *PreAuthKeyResource) List(ctx context.Context) (PreAuthKeysResponse, error) {
 	var keys PreAuthKeysResponse
 
-	url := p.R.BuildURL("preauthkey")
-	req, err := p.R.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
+	url := p.r.BuildURL("preauthkey")
+	req, err := p.r.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
 	if err != nil {
 		return keys, err
 	}
 
-	err = p.R.Do(ctx, req, &keys)
+	err = p.r.Do(ctx, req, &keys)
 	return keys, err
 }
 
@@ -68,15 +78,15 @@ type PreAuthKeyResponse struct {
 func (p *PreAuthKeyResource) Create(ctx context.Context, createPreAuthKeyRequest CreatePreAuthKeyRequest) (PreAuthKeyResponse, error) {
 	var key PreAuthKeyResponse
 
-	url := p.R.BuildURL("preauthkey")
-	req, err := p.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := p.r.BuildURL("preauthkey")
+	req, err := p.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: createPreAuthKeyRequest,
 	})
 	if err != nil {
 		return key, err
 	}
 
-	err = p.R.Do(ctx, req, &key)
+	err = p.r.Do(ctx, req, &key)
 	return key, err
 }
 
@@ -87,31 +97,26 @@ type ExpirePreAuthKeyRequest struct {
 
 // Expire expires a pre-auth key in Headscale.
 func (p *PreAuthKeyResource) Expire(ctx context.Context, id string) error {
-	url := p.R.BuildURL("preauthkey", "expire")
-	req, err := p.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := p.r.BuildURL("preauthkey", "expire")
+	req, err := p.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: ExpirePreAuthKeyRequest{ID: id},
 	})
 	if err != nil {
 		return err
 	}
 
-	return p.R.Do(ctx, req, nil)
+	return p.r.Do(ctx, req, nil)
 }
 
 // Delete removes a pre-auth key from the Headscale.
 func (p *PreAuthKeyResource) Delete(ctx context.Context, id string) error {
-	url := p.R.BuildURL("preauthkey")
-	req, err := p.R.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{
+	url := p.r.BuildURL("preauthkey")
+	req, err := p.r.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{
 		QueryParams: map[string]any{"id": id},
 	})
 	if err != nil {
 		return err
 	}
 
-	return p.R.Do(ctx, req, nil)
-}
-
-// PreAuthKeyResource is a struct that implements the PreAuthKeyResourceInterface.
-type PreAuthKeyResource struct {
-	R requests.RequestInterface
+	return p.r.Do(ctx, req, nil)
 }

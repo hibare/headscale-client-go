@@ -1,260 +1,68 @@
 package users
 
 import (
-	"errors"
+	"context"
 	"net/http"
-	"net/url"
 	"testing"
 
 	"github.com/hibare/headscale-client-go/requests"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
+	"github.com/hibare/headscale-client-go/v1/testutil"
 )
 
 func TestUserResource_List(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		u := &UserResource{R: mockReq}
-		ctx := t.Context()
-		filter := UserListFilter{ID: "1", Name: "test", Email: "test@example.com"}
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-		fakeResp := UsersResponse{Users: []User{{ID: "1", Name: "test"}}}
+	fixture := testutil.TestFixture[UsersResponse]{
+		Endpoint:    "user",
+		Method:      http.MethodGet,
+		SuccessResp: UsersResponse{Users: []User{{ID: "1", Name: "test"}}},
+	}
 
-		mockReq.On("BuildURL", "user").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodGet, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*users.UsersResponse")).Run(func(args mock.Arguments) {
-			resp := args.Get(2).(*UsersResponse) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
-			*resp = fakeResp
-		}).Return(nil)
-
-		resp, err := u.List(ctx, filter)
-		require.NoError(t, err)
-		assert.Equal(t, fakeResp, resp)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		u := &UserResource{R: mockReq}
-		ctx := t.Context()
-		filter := UserListFilter{}
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "user").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodGet, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		resp, err := u.List(ctx, filter)
-		require.Error(t, err)
-		assert.Empty(t, resp.Users)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		u := &UserResource{R: mockReq}
-		ctx := t.Context()
-		filter := UserListFilter{}
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "user").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodGet, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*users.UsersResponse")).Return(errors.New("do error"))
-
-		resp, err := u.List(ctx, filter)
-		require.Error(t, err)
-		assert.Empty(t, resp.Users)
-		mockReq.AssertExpectations(t)
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (UsersResponse, error) {
+		u := &UserResource{r: mockReq}
+		return u.List(ctx, UserListFilter{})
 	})
 }
 
 func TestUserResource_Create(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		u := &UserResource{R: mockReq}
-		ctx := t.Context()
-		name := "test"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-		fakeResp := UserResponse{User: User{ID: "1", Name: name}}
+	fixture := testutil.TestFixture[UserResponse]{
+		Endpoint:    "user",
+		Method:      http.MethodPost,
+		SuccessResp: UserResponse{User: User{ID: "1", Name: "test"}},
+	}
 
-		mockReq.On("BuildURL", "user").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*users.UserResponse")).Run(func(args mock.Arguments) {
-			resp := args.Get(2).(*UserResponse) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
-			*resp = fakeResp
-		}).Return(nil)
-
-		resp, err := u.Create(ctx, CreateUserRequest{
-			Name:        name,
-			DisplayName: name,
-			Email:       name + "@example.com",
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (UserResponse, error) {
+		u := &UserResource{r: mockReq}
+		return u.Create(ctx, CreateUserRequest{
+			Name:        "test",
+			DisplayName: "test",
+			Email:       "test@example.com",
 			PictureURL:  "https://example.com/picture.png",
 		})
-		require.NoError(t, err)
-		assert.Equal(t, fakeResp, resp)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		u := &UserResource{R: mockReq}
-		ctx := t.Context()
-		name := "test"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "user").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		resp, err := u.Create(ctx, CreateUserRequest{
-			Name:        name,
-			DisplayName: name,
-			Email:       name + "@example.com",
-			PictureURL:  "https://example.com/picture.png",
-		})
-		require.Error(t, err)
-		assert.Empty(t, resp.User)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		u := &UserResource{R: mockReq}
-		ctx := t.Context()
-		name := "test"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "user").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*users.UserResponse")).Return(errors.New("do error"))
-
-		resp, err := u.Create(ctx, CreateUserRequest{
-			Name:        name,
-			DisplayName: name,
-			Email:       name + "@example.com",
-			PictureURL:  "https://example.com/picture.png",
-		})
-		require.Error(t, err)
-		assert.Empty(t, resp.User)
-		mockReq.AssertExpectations(t)
 	})
 }
 
 func TestUserResource_Delete(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		u := &UserResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
+	fixture := testutil.TestFixture[struct{}]{
+		Endpoint:    []any{"user", "1"},
+		Method:      http.MethodDelete,
+		SuccessResp: struct{}{},
+	}
 
-		mockReq.On("BuildURL", "user", id).Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodDelete, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, nil).Return(nil)
-
-		err := u.Delete(ctx, id)
-		require.NoError(t, err)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		u := &UserResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "user", id).Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodDelete, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		err := u.Delete(ctx, id)
-		require.Error(t, err)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		u := &UserResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "user", id).Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodDelete, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, nil).Return(errors.New("do error"))
-
-		err := u.Delete(ctx, id)
-		require.Error(t, err)
-		mockReq.AssertExpectations(t)
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (struct{}, error) {
+		u := &UserResource{r: mockReq}
+		err := u.Delete(ctx, "1")
+		return struct{}{}, err
 	})
 }
 
 func TestUserResource_Rename(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		u := &UserResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		newName := "new-name"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-		fakeResp := UserResponse{User: User{ID: id, Name: newName}}
+	fixture := testutil.TestFixture[UserResponse]{
+		Endpoint:    []any{"user", "1", "rename", "new-name"},
+		Method:      http.MethodPost,
+		SuccessResp: UserResponse{User: User{ID: "1", Name: "new-name"}},
+	}
 
-		mockReq.On("BuildURL", "user", id, "rename", newName).Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*users.UserResponse")).Run(func(args mock.Arguments) {
-			resp := args.Get(2).(*UserResponse) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
-			*resp = fakeResp
-		}).Return(nil)
-
-		resp, err := u.Rename(ctx, id, newName)
-		require.NoError(t, err)
-		assert.Equal(t, fakeResp, resp)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		u := &UserResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		newName := "new-name"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "user", id, "rename", newName).Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		resp, err := u.Rename(ctx, id, newName)
-		require.Error(t, err)
-		assert.Empty(t, resp.User)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		u := &UserResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		newName := "new-name"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "user", id, "rename", newName).Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*users.UserResponse")).Return(errors.New("do error"))
-
-		resp, err := u.Rename(ctx, id, newName)
-		require.Error(t, err)
-		assert.Empty(t, resp.User)
-		mockReq.AssertExpectations(t)
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (UserResponse, error) {
+		u := &UserResource{r: mockReq}
+		return u.Rename(ctx, "1", "new-name")
 	})
 }

@@ -29,11 +29,21 @@ var (
 	ErrURIRequired = errors.New("uri cannot be nil")
 )
 
+// APIError represents a structured API error response.
+type APIError struct {
+	StatusCode int
+	Body       string
+}
+
+func (e *APIError) Error() string {
+	return fmt.Sprintf("api error status %d: %s", e.StatusCode, e.Body)
+}
+
 // RequestInterface defines the interface for building and executing HTTP requests.
 type RequestInterface interface {
 	BuildURL(pathParts ...any) *url.URL
 	BuildRequest(ctx context.Context, method string, uri *url.URL, opt RequestOptions) (*http.Request, error)
-	Do(ctx context.Context, req *http.Request, v interface{}) error
+	Do(ctx context.Context, req *http.Request, v any) error
 }
 
 // Request represents an HTTP request builder and executor.
@@ -59,10 +69,10 @@ func (r *Request) BuildURL(pathParts ...any) *url.URL {
 
 // RequestOptions contains options for building an HTTP request.
 type RequestOptions struct {
-	Body        interface{}
+	Body        any
 	Headers     map[string]string
 	ContentType string
-	QueryParams map[string]interface{}
+	QueryParams map[string]any
 }
 
 // BuildRequest creates an HTTP request with the specified method, URL, and options.
@@ -114,7 +124,7 @@ func (r *Request) BuildRequest(ctx context.Context, method string, uri *url.URL,
 }
 
 // Do executes the HTTP request and decodes the response into v if provided.
-func (r *Request) Do(ctx context.Context, req *http.Request, v interface{}) error {
+func (r *Request) Do(ctx context.Context, req *http.Request, v any) error {
 	r.logger.Debug(ctx, "Request: ", "method", req.Method, "url", req.URL.String())
 	resp, err := r.httpClient.Do(req)
 	if err != nil {
@@ -124,12 +134,18 @@ func (r *Request) Do(ctx context.Context, req *http.Request, v interface{}) erro
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		// Read response body for logging
 		respBody, rErr := io.ReadAll(resp.Body)
+		var bodyStr string
 		if rErr == nil {
-			r.logger.Error(ctx, "Response: ", "status", resp.StatusCode, "body", string(respBody))
+			bodyStr = string(respBody)
+			r.logger.Error(ctx, "Response: ", "status", resp.StatusCode, "body", bodyStr)
+		} else {
+			r.logger.Error(ctx, "Failed to read response body: ", "status", resp.StatusCode, "error", rErr)
 		}
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return &APIError{
+			StatusCode: resp.StatusCode,
+			Body:       bodyStr,
+		}
 	}
 
 	if v != nil {

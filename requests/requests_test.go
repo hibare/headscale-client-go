@@ -50,7 +50,7 @@ func TestBuildRequest(t *testing.T) {
 		Body:        map[string]string{"hello": "world"},
 		Headers:     map[string]string{"X-Test": "yes"},
 		ContentType: "application/json",
-		QueryParams: map[string]interface{}{"q": "search"},
+		QueryParams: map[string]any{"q": "search"},
 	}
 	req, err := r.BuildRequest(t.Context(), http.MethodPost, uri, opt)
 	require.NoError(t, err)
@@ -120,6 +120,36 @@ func TestDo_ErrorStatus(t *testing.T) {
 	require.NoError(t, err)
 	err = r.Do(t.Context(), req, nil)
 	require.Error(t, err)
+}
+
+// TestDo_TypedError checks that a non-2xx status code returns a typed APIError that can be extracted with errors.As.
+func TestDo_TypedError(t *testing.T) {
+	h := func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("bad request body"))
+	}
+	ts := httptest.NewServer(http.HandlerFunc(h))
+	defer ts.Close()
+
+	baseURL, _ := url.Parse(ts.URL + "/")
+	r := &Request{
+		baseURL:    baseURL,
+		apiKey:     TestAPIKey,
+		apiVersion: versions.APIVersionV1,
+		userAgent:  DefaultUserAgent,
+		logger:     logger.NewDefaultLogger(logger.LevelError),
+		httpClient: ts.Client(),
+	}
+
+	uri := r.BuildURL("foo")
+	req, err := r.BuildRequest(t.Context(), http.MethodGet, uri, RequestOptions{})
+	require.NoError(t, err)
+
+	err = r.Do(t.Context(), req, nil)
+	var apiErr *APIError
+	require.ErrorAs(t, err, &apiErr)
+	require.Equal(t, http.StatusBadRequest, apiErr.StatusCode)
+	require.Equal(t, "bad request body", apiErr.Body)
 }
 
 // TestBuildRequest_InvalidURL checks that BuildRequest returns an error if the URL is nil.

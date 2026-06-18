@@ -14,6 +14,16 @@ type PolicyResourceInterface interface {
 	Update(ctx context.Context, policy string) (UpdatePolicyResponse, error)
 }
 
+// PolicyResource is a struct that implements the PolicyResourceInterface.
+type PolicyResource struct {
+	r requests.RequestInterface
+}
+
+// NewPolicyResource creates a new PolicyResource.
+func NewPolicyResource(r requests.RequestInterface) *PolicyResource {
+	return &PolicyResource{r: r}
+}
+
 // Policy represents a policy in Headscale.
 type Policy struct {
 	Policy    string `json:"policy"`
@@ -29,13 +39,13 @@ type UpdatePolicyRequest struct {
 func (p *PolicyResource) Get(ctx context.Context) (Policy, error) {
 	var policy Policy
 
-	url := p.R.BuildURL("policy")
-	req, err := p.R.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
+	url := p.r.BuildURL("policy")
+	req, err := p.r.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
 	if err != nil {
 		return policy, err
 	}
 
-	err = p.R.Do(ctx, req, &policy)
+	err = p.r.Do(ctx, req, &policy)
 	return policy, err
 }
 
@@ -49,8 +59,8 @@ type UpdatePolicyResponse struct {
 func (p *PolicyResource) Update(ctx context.Context, policy string) (UpdatePolicyResponse, error) {
 	var updatePolicy UpdatePolicyResponse
 
-	url := p.R.BuildURL("policy")
-	req, err := p.R.BuildRequest(ctx, http.MethodPut, url, requests.RequestOptions{
+	url := p.r.BuildURL("policy")
+	req, err := p.r.BuildRequest(ctx, http.MethodPut, url, requests.RequestOptions{
 		Body: UpdatePolicyRequest{
 			Policy: policy,
 		},
@@ -59,11 +69,6 @@ func (p *PolicyResource) Update(ctx context.Context, policy string) (UpdatePolic
 		return updatePolicy, err
 	}
 
-	err = p.R.Do(ctx, req, &updatePolicy)
+	err = p.r.Do(ctx, req, &updatePolicy)
 	return updatePolicy, err
-}
-
-// PolicyResource is a struct that implements the PolicyResourceInterface.
-type PolicyResource struct {
-	R requests.RequestInterface
 }

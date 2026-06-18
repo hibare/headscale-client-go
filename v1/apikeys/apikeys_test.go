@@ -1,287 +1,83 @@
 package apikeys
 
 import (
-	"errors"
+	"context"
 	"net/http"
-	"net/url"
 	"testing"
 	"time"
 
 	"github.com/hibare/headscale-client-go/requests"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
+	"github.com/hibare/headscale-client-go/v1/testutil"
 )
 
 func TestAPIKeyResource_List(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-		fakeResp := APIKeysResponse{APIKeys: []APIKey{{ID: "1", Prefix: "prefix1"}}}
+	fixture := testutil.TestFixture[APIKeysResponse]{
+		Endpoint:    "apikey",
+		Method:      http.MethodGet,
+		SuccessResp: APIKeysResponse{APIKeys: []APIKey{{ID: "1", Prefix: "prefix1"}}},
+	}
 
-		mockReq.On("BuildURL", "apikey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodGet, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*apikeys.APIKeysResponse")).Run(func(args mock.Arguments) {
-			resp := args.Get(2).(*APIKeysResponse) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
-			*resp = fakeResp
-		}).Return(nil)
-
-		resp, err := a.List(ctx)
-		require.NoError(t, err)
-		assert.Equal(t, fakeResp, resp)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "apikey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodGet, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		resp, err := a.List(ctx)
-		require.Error(t, err)
-		assert.Empty(t, resp.APIKeys)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "apikey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodGet, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*apikeys.APIKeysResponse")).Return(errors.New("do error"))
-
-		resp, err := a.List(ctx)
-		require.Error(t, err)
-		assert.Empty(t, resp.APIKeys)
-		mockReq.AssertExpectations(t)
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (APIKeysResponse, error) {
+		a := &APIKeyResource{r: mockReq}
+		return a.List(ctx)
 	})
 }
 
 func TestAPIKeyResource_Create(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		expiration := time.Now().Add(24 * time.Hour)
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-		fakeResp := CreateAPIKeyResponse{APIKey: "new-api-key"}
+	expiration := time.Now().Add(24 * time.Hour)
+	fixture := testutil.TestFixture[CreateAPIKeyResponse]{
+		Endpoint:    "apikey",
+		Method:      http.MethodPost,
+		SuccessResp: CreateAPIKeyResponse{APIKey: "new-api-key"},
+	}
 
-		mockReq.On("BuildURL", "apikey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*apikeys.CreateAPIKeyResponse")).Run(func(args mock.Arguments) {
-			resp := args.Get(2).(*CreateAPIKeyResponse) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
-			*resp = fakeResp
-		}).Return(nil)
-
-		resp, err := a.Create(ctx, CreateAPIKeyRequest{Expiration: expiration})
-		require.NoError(t, err)
-		assert.Equal(t, fakeResp, resp)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		expiration := time.Now().Add(24 * time.Hour)
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "apikey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		resp, err := a.Create(ctx, CreateAPIKeyRequest{Expiration: expiration})
-		require.Error(t, err)
-		assert.Empty(t, resp.APIKey)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		expiration := time.Now().Add(24 * time.Hour)
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "apikey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*apikeys.CreateAPIKeyResponse")).Return(errors.New("do error"))
-
-		resp, err := a.Create(ctx, CreateAPIKeyRequest{Expiration: expiration})
-		require.Error(t, err)
-		assert.Empty(t, resp.APIKey)
-		mockReq.AssertExpectations(t)
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (CreateAPIKeyResponse, error) {
+		a := &APIKeyResource{r: mockReq}
+		return a.Create(ctx, CreateAPIKeyRequest{Expiration: expiration})
 	})
 }
 
-//nolint:dupl // Test code is intentionally similar for consistency
 func TestAPIKeyResource_Expire(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		prefix := "prefix1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
+	prefix := "prefix1"
+	fixture := testutil.TestFixture[struct{}]{
+		Endpoint:    []any{"apikey", "expire"},
+		Method:      http.MethodPost,
+		SuccessResp: struct{}{},
+	}
 
-		mockReq.On("BuildURL", "apikey", "expire").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, nil).Return(nil)
-
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (struct{}, error) {
+		a := &APIKeyResource{r: mockReq}
 		err := a.Expire(ctx, prefix)
-		require.NoError(t, err)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		prefix := "prefix1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "apikey", "expire").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		err := a.Expire(ctx, prefix)
-		require.Error(t, err)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		prefix := "prefix1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "apikey", "expire").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, nil).Return(errors.New("do error"))
-
-		err := a.Expire(ctx, prefix)
-		require.Error(t, err)
-		mockReq.AssertExpectations(t)
+		return struct{}{}, err
 	})
 }
 
 func TestAPIKeyResource_Delete(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		prefix := "prefix1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
+	prefix := "prefix1"
+	fixture := testutil.TestFixture[struct{}]{
+		Endpoint:    []any{"apikey", prefix},
+		Method:      http.MethodDelete,
+		SuccessResp: struct{}{},
+	}
 
-		mockReq.On("BuildURL", "apikey", prefix).Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodDelete, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, nil).Return(nil)
-
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (struct{}, error) {
+		a := &APIKeyResource{r: mockReq}
 		err := a.Delete(ctx, prefix)
-		require.NoError(t, err)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		prefix := "prefix1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "apikey", prefix).Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodDelete, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		err := a.Delete(ctx, prefix)
-		require.Error(t, err)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		prefix := "prefix1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "apikey", prefix).Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodDelete, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, nil).Return(errors.New("do error"))
-
-		err := a.Delete(ctx, prefix)
-		require.Error(t, err)
-		mockReq.AssertExpectations(t)
+		return struct{}{}, err
 	})
 }
 
-//nolint:dupl // Test code is intentionally similar for consistency
 func TestAPIKeyResource_ExpireByID(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
+	id := "1"
+	fixture := testutil.TestFixture[struct{}]{
+		Endpoint:    []any{"apikey", "expire"},
+		Method:      http.MethodPost,
+		SuccessResp: struct{}{},
+	}
 
-		mockReq.On("BuildURL", "apikey", "expire").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, nil).Return(nil)
-
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (struct{}, error) {
+		a := &APIKeyResource{r: mockReq}
 		err := a.ExpireByID(ctx, id)
-		require.NoError(t, err)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "apikey", "expire").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		err := a.ExpireByID(ctx, id)
-		require.Error(t, err)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		a := &APIKeyResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "apikey", "expire").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, nil).Return(errors.New("do error"))
-
-		err := a.ExpireByID(ctx, id)
-		require.Error(t, err)
-		mockReq.AssertExpectations(t)
+		return struct{}{}, err
 	})
 }

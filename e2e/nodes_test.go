@@ -63,10 +63,10 @@ func (s *E2ESuite) TestNodes_AddTags() {
 	s.Require().Contains(taggedNode.Node.Tags, "tag:e2e-test", "Expected node to have the added tag")
 }
 
-func (s *E2ESuite) TestNodes_BackFillIP() {
+func (s *E2ESuite) TestNodes_BackfillIPs() {
 	ctx := s.T().Context()
 
-	resp, err := s.client.Nodes().BackFillIP(ctx, true)
+	resp, err := s.client.Nodes().BackfillIPs(ctx, true)
 	s.Require().NoError(err)
 	s.NotNil(resp, "Expected backfill response")
 }

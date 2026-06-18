@@ -59,7 +59,7 @@ func (s *E2ESuite) TestPolicy_UpdateWithGroups() {
 
 // assertPolicyEqual unmarshals both expected and actual policy strings into maps and compares them.
 func (s *E2ESuite) assertPolicyEqual(expected, actual string) {
-	var expectedMap, actualMap map[string]interface{}
+	var expectedMap, actualMap map[string]any
 
 	err := json.Unmarshal([]byte(expected), &expectedMap)
 	s.Require().NoError(err, "Failed to unmarshal expected policy")

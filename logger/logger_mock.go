@@ -11,22 +11,22 @@ type MockLogger struct {
 	mock.Mock
 }
 
-// Info logs an mock info message.
-func (m *MockLogger) Info(ctx context.Context, msg string, keysAndValues ...interface{}) {
-	m.Called(ctx, msg, keysAndValues)
+// Info logs a mock info message.
+func (m *MockLogger) Info(ctx context.Context, msg string, keysAndValues ...any) {
+	m.Called(append([]any{ctx, msg}, keysAndValues...)...)
 }
 
-// Error logs an mock error message.
-func (m *MockLogger) Error(ctx context.Context, msg string, keysAndValues ...interface{}) {
-	m.Called(ctx, msg, keysAndValues)
+// Error logs a mock error message.
+func (m *MockLogger) Error(ctx context.Context, msg string, keysAndValues ...any) {
+	m.Called(append([]any{ctx, msg}, keysAndValues...)...)
 }
 
-// Warn logs an mock warning message.
-func (m *MockLogger) Warn(ctx context.Context, msg string, keysAndValues ...interface{}) {
-	m.Called(ctx, msg, keysAndValues)
+// Warn logs a mock warning message.
+func (m *MockLogger) Warn(ctx context.Context, msg string, keysAndValues ...any) {
+	m.Called(append([]any{ctx, msg}, keysAndValues...)...)
 }
 
-// Debug logs an mock debug message.
-func (m *MockLogger) Debug(ctx context.Context, msg string, keysAndValues ...interface{}) {
-	m.Called(ctx, msg, keysAndValues)
+// Debug logs a mock debug message.
+func (m *MockLogger) Debug(ctx context.Context, msg string, keysAndValues ...any) {
+	m.Called(append([]any{ctx, msg}, keysAndValues...)...)
 }

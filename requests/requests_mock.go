@@ -26,7 +26,7 @@ func (m *MockRequest) BuildRequest(ctx context.Context, method string, uri *url.
 }
 
 // Do is a mock for the Do method.
-func (m *MockRequest) Do(ctx context.Context, req *http.Request, v interface{}) error {
+func (m *MockRequest) Do(ctx context.Context, req *http.Request, v any) error {
 	args := m.Called(ctx, req, v)
 	return args.Error(0)
 }

@@ -10,32 +10,17 @@ _A Go client for the [Headscale](https://headscale.net) HTTP API._
 
 </div>
 
-## Features
-
-- **API Keys**: List, create, expire, and delete API keys (by prefix or ID).
-- **Nodes**: List, get, register, delete, expire, rename, tag, and backfill IPs.
-- **Users**: List, create, delete, and rename users.
-- **Policies**: Get and update policy documents.
-- **Pre-Auth Keys**: List, create, expire, and delete pre-auth keys.
-- Customizable HTTP client, user agent, and logger support.
-- Idiomatic Go API with context support.
-
----
+A Go client library for the Headscale HTTP API — manage users, nodes, API keys, pre-auth keys, and ACL policies.
 
 ## Requirements
 
-- **Go**: 1.26+
-- **Headscale**: v0.28.0+
-
----
+Go 1.26+, Headscale v0.28.0+
 
 ## Installation
 
-```sh
+```
 go get github.com/hibare/headscale-client-go
 ```
-
----
 
 ## Quick Start
 
@@ -45,84 +30,47 @@ package main
 import (
     "context"
     "fmt"
-
     hsClient "github.com/hibare/headscale-client-go/v1/client"
     "github.com/hibare/headscale-client-go/v1/nodes"
 )
 
 func main() {
-    // Create client
-    client, err := hsClient.NewClient(
-        "http://headscale:8080",
-        "your-api-key",
-        hsClient.ClientOptions{},
-    )
+    client, err := hsClient.NewClient("http://headscale:8080", "your-api-key", hsClient.ClientOptions{})
     if err != nil {
         panic(err)
     }
-
-    // List nodes
     nodeList, err := client.Nodes().List(context.Background(), nodes.NodeListFilter{})
     if err != nil {
         panic(err)
     }
-
     for _, node := range nodeList.Nodes {
         fmt.Printf("Node: %s (%s)\n", node.Name, node.ID)
     }
 }
 ```
 
----
+## Documentation
 
-## API Overview
-
-| Resource               | Description          |
-| ---------------------- | -------------------- |
-| `client.APIKeys()`     | Manage API keys      |
-| `client.Nodes()`       | Manage nodes         |
-| `client.Users()`       | Manage users         |
-| `client.Policy()`      | Manage policy        |
-| `client.PreAuthKeys()` | Manage pre-auth keys |
-
-For full API documentation, see [pkg.go.dev](https://pkg.go.dev/github.com/hibare/headscale-client-go).
-
----
-
-## Examples
-
-See the [`examples/`](examples/) directory for more usage examples.
-
----
+| Resource                                  | What it covers                                   |
+| ----------------------------------------- | ------------------------------------------------ |
+| [Setup & Customization](docs/overview.md) | Install, client setup, options, error handling   |
+| [API Keys](docs/apikeys.md)               | Create, list, expire, delete API keys            |
+| [Nodes](docs/nodes.md)                    | List, get, register, rename, tag, approve routes |
+| [Users](docs/users.md)                    | List, create, rename, delete users               |
+| [Policy](docs/policy.md)                  | Read and update ACL documents                    |
+| [Pre-Auth Keys](docs/preauthkeys.md)      | Create, list, expire, delete pre-auth keys       |
 
 ## Development
 
-```sh
-# Run tests
-make test
-
-# Run E2E tests (requires Docker)
-make e2e-test
-
-# Lint
+```bash
+make test         # unit tests
+make e2e-test     # E2E tests (requires Docker)
 golangci-lint run
-
-# Format
 go fmt ./...
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
-
----
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
-
----
-
-## Links
-
-- [Headscale](https://headscale.net)
-- [pkg.go.dev Documentation](https://pkg.go.dev/github.com/hibare/headscale-client-go)
-- [GitHub Issues](https://github.com/hibare/headscale-client-go/issues)
+MIT — see [LICENSE](LICENSE).

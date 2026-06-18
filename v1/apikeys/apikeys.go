@@ -18,6 +18,16 @@ type APIKeyResourceInterface interface {
 	Delete(ctx context.Context, prefix string) error
 }
 
+// APIKeyResource is a struct that implements the APIKeyResourceInterface.
+type APIKeyResource struct {
+	r requests.RequestInterface
+}
+
+// NewAPIKeyResource creates a new APIKeyResource.
+func NewAPIKeyResource(r requests.RequestInterface) *APIKeyResource {
+	return &APIKeyResource{r: r}
+}
+
 // APIKey represents an API key in Headscale.
 type APIKey struct {
 	ID         string    `json:"id"`
@@ -27,7 +37,7 @@ type APIKey struct {
 	LastSeen   time.Time `json:"lastSeen"`
 }
 
-// APIKeysResponse represents a single API key response from the API.
+// APIKeysResponse represents a list of API keys response from the API.
 type APIKeysResponse struct {
 	APIKeys []APIKey `json:"apiKeys"`
 }
@@ -36,13 +46,13 @@ type APIKeysResponse struct {
 func (a *APIKeyResource) List(ctx context.Context) (APIKeysResponse, error) {
 	var keys APIKeysResponse
 
-	url := a.R.BuildURL("apikey")
-	req, err := a.R.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
+	url := a.r.BuildURL("apikey")
+	req, err := a.r.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
 	if err != nil {
 		return keys, err
 	}
 
-	err = a.R.Do(ctx, req, &keys)
+	err = a.r.Do(ctx, req, &keys)
 	return keys, err
 }
 
@@ -60,15 +70,15 @@ type CreateAPIKeyResponse struct {
 func (a *APIKeyResource) Create(ctx context.Context, createAPIKeyRequest CreateAPIKeyRequest) (CreateAPIKeyResponse, error) {
 	var key CreateAPIKeyResponse
 
-	url := a.R.BuildURL("apikey")
-	req, err := a.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := a.r.BuildURL("apikey")
+	req, err := a.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: createAPIKeyRequest,
 	})
 	if err != nil {
 		return key, err
 	}
 
-	err = a.R.Do(ctx, req, &key)
+	err = a.r.Do(ctx, req, &key)
 	return key, err
 }
 
@@ -80,8 +90,8 @@ type ExpireAPIKeyRequest struct {
 
 // Expire expires an API key in Headscale.
 func (a *APIKeyResource) Expire(ctx context.Context, prefix string) error {
-	url := a.R.BuildURL("apikey", "expire")
-	req, err := a.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := a.r.BuildURL("apikey", "expire")
+	req, err := a.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: ExpireAPIKeyRequest{
 			Prefix: prefix,
 		},
@@ -90,13 +100,13 @@ func (a *APIKeyResource) Expire(ctx context.Context, prefix string) error {
 		return err
 	}
 
-	return a.R.Do(ctx, req, nil)
+	return a.r.Do(ctx, req, nil)
 }
 
 // ExpireByID expires an API key by ID in Headscale.
 func (a *APIKeyResource) ExpireByID(ctx context.Context, id string) error {
-	url := a.R.BuildURL("apikey", "expire")
-	req, err := a.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := a.r.BuildURL("apikey", "expire")
+	req, err := a.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: ExpireAPIKeyRequest{
 			ID: id,
 		},
@@ -105,21 +115,16 @@ func (a *APIKeyResource) ExpireByID(ctx context.Context, id string) error {
 		return err
 	}
 
-	return a.R.Do(ctx, req, nil)
+	return a.r.Do(ctx, req, nil)
 }
 
 // Delete removes an API key from the Headscale.
 func (a *APIKeyResource) Delete(ctx context.Context, prefix string) error {
-	url := a.R.BuildURL("apikey", prefix)
-	req, err := a.R.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{})
+	url := a.r.BuildURL("apikey", prefix)
+	req, err := a.r.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{})
 	if err != nil {
 		return err
 	}
 
-	return a.R.Do(ctx, req, nil)
-}
-
-// APIKeyResource is a struct that implements the APIKeyResourceInterface.
-type APIKeyResource struct {
-	R requests.RequestInterface
+	return a.r.Do(ctx, req, nil)
 }
