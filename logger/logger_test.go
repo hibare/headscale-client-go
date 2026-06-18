@@ -152,7 +152,7 @@ func TestMockLogger_DirectExecution(t *testing.T) {
 	ml := &MockLogger{}
 	ctx := t.Context()
 
-	ml.On("Info", ctx, "hello", []any{"a", "b"}).Return()
+	ml.On("Info", ctx, "hello", "a", "b").Return()
 	ml.Info(ctx, "hello", "a", "b")
 	ml.AssertExpectations(t)
 }

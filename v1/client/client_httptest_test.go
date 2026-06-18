@@ -1,7 +1,6 @@
 package client
 
 import (
-	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -59,9 +58,8 @@ func TestClient_HTTPRequests(t *testing.T) {
 
 	client, err := NewClient(srv.URL, "test-api-key", ClientOptions{})
 	require.NoError(t, err)
-	ctx := context.Background()
-
 	t.Run("APIKeys.List", func(t *testing.T) {
+		ctx := t.Context()
 		requests = nil
 		_, listErr := client.APIKeys().List(ctx)
 		require.NoError(t, listErr)
@@ -74,6 +72,7 @@ func TestClient_HTTPRequests(t *testing.T) {
 	})
 
 	t.Run("Users.List with filter", func(t *testing.T) {
+		ctx := t.Context()
 		requests = nil
 		_, listErr := client.Users().List(ctx, users.UserListFilter{Name: "test"})
 		require.NoError(t, listErr)
@@ -85,6 +84,7 @@ func TestClient_HTTPRequests(t *testing.T) {
 	})
 
 	t.Run("Nodes.Get", func(t *testing.T) {
+		ctx := t.Context()
 		requests = nil
 		_, getErr := client.Nodes().Get(ctx, "node-1")
 		require.NoError(t, getErr)
@@ -96,6 +96,7 @@ func TestClient_HTTPRequests(t *testing.T) {
 	})
 
 	t.Run("Policy.Update", func(t *testing.T) {
+		ctx := t.Context()
 		requests = nil
 		_, updateErr := client.Policy().Update(ctx, `{"acls":[]}`)
 		require.NoError(t, updateErr)
@@ -107,6 +108,7 @@ func TestClient_HTTPRequests(t *testing.T) {
 	})
 
 	t.Run("PreAuthKeys.Create", func(t *testing.T) {
+		ctx := t.Context()
 		requests = nil
 		_, createErr := client.PreAuthKeys().Create(ctx, preauthkeys.CreatePreAuthKeyRequest{
 			User:       "u1",

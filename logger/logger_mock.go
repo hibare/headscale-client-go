@@ -13,20 +13,20 @@ type MockLogger struct {
 
 // Info logs a mock info message.
 func (m *MockLogger) Info(ctx context.Context, msg string, keysAndValues ...any) {
-	m.Called(ctx, msg, keysAndValues)
+	m.Called(append([]any{ctx, msg}, keysAndValues...)...)
 }
 
 // Error logs a mock error message.
 func (m *MockLogger) Error(ctx context.Context, msg string, keysAndValues ...any) {
-	m.Called(ctx, msg, keysAndValues)
+	m.Called(append([]any{ctx, msg}, keysAndValues...)...)
 }
 
 // Warn logs a mock warning message.
 func (m *MockLogger) Warn(ctx context.Context, msg string, keysAndValues ...any) {
-	m.Called(ctx, msg, keysAndValues)
+	m.Called(append([]any{ctx, msg}, keysAndValues...)...)
 }
 
 // Debug logs a mock debug message.
 func (m *MockLogger) Debug(ctx context.Context, msg string, keysAndValues ...any) {
-	m.Called(ctx, msg, keysAndValues)
+	m.Called(append([]any{ctx, msg}, keysAndValues...)...)
 }
