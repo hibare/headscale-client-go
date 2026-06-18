@@ -17,18 +17,16 @@ import (
 var hsClientNewClient = hsClient.NewClient
 var stdout = os.Stdout
 
-func listNodes(client hsClient.ClientInterface) (string, error) {
-	ns, err := client.Nodes().List(context.Background(), nodes.NodeListFilter{})
+func listNodes(ctx context.Context, client hsClient.ClientInterface) (string, error) {
+	ns, err := client.Nodes().List(ctx, nodes.NodeListFilter{})
 	if err != nil {
 		return "", err
 	}
-	result := ""
-	var resultSb23 strings.Builder
+	var sb strings.Builder
 	for _, node := range ns.Nodes {
-		fmt.Fprintf(&resultSb23, "Node: %+v\n", node)
+		fmt.Fprintf(&sb, "Node: %+v\n", node)
 	}
-	result += resultSb23.String()
-	return result, nil
+	return sb.String(), nil
 }
 
 func main() {
@@ -44,7 +42,7 @@ func main() {
 	}
 
 	_, _ = fmt.Fprintln(stdout, "Listing Nodes")
-	output, err := listNodes(client)
+	output, err := listNodes(context.Background(), client)
 	if err != nil {
 		panic(err)
 	}

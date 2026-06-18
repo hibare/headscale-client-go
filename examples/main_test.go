@@ -18,10 +18,10 @@ func TestListNodes(t *testing.T) {
 	nodeMock.On("List", mock.Anything, nodes.NodeListFilter{}).Return(fakeNodes, nil)
 
 	// Mock client
-	clientMock := new(client.MockClientV1)
+	clientMock := new(client.MockClient)
 	clientMock.On("Nodes").Return(nodeMock)
 
-	output, err := listNodes(clientMock)
+	output, err := listNodes(t.Context(), clientMock)
 	require.NoError(t, err)
 	require.Contains(t, output, "ID:1")
 	require.Contains(t, output, "Name:testnode")

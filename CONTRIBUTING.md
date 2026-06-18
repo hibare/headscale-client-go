@@ -1,73 +1,33 @@
 # Contributing
 
-Contributions are welcome! This document provides guidelines for contributing to headscale-client-go.
-
-## Development Setup
-
-### Prerequisites
+## Prerequisites
 
 - Go 1.26+
-- Docker (for E2E tests)
-- golangci-lint
+- Docker (E2E tests only)
+- golangci-lint (`make init`)
 
-### Setup
+## Workflow
 
-```sh
-# Clone the repository
-git clone https://github.com/hibare/headscale-client-go.git
-cd headscale-client-go
+1. Fork and clone the repo
+2. `make init`
+3. Create a branch: `git checkout -b feat/your-feature`
+4. Make changes
+5. **Pre-submit:** `go fmt ./... && golangci-lint run && make test`
+6. Commit: `git commit -m "feat: description"`
+7. Push and open a PR
 
-# Install development tools
-make init
-```
+## Guidelines
 
-## Code Style
+- All exported symbols need Go doc comments
+- New code should include tests
+- Update docs if behaviour changes
 
-- Run `go fmt ./...` before committing
-- Follow Go conventions and idiomatic patterns
-- Ensure all exported types have documentation comments
-- Run `golangci-lint run` to check for issues
+### PR Checklist
 
-## Testing
-
-### Unit Tests
-
-```sh
-make test
-```
-
-### E2E Tests
-
-E2E tests require Docker and use testcontainers-go to spin up Headscale and Tailscale containers.
-
-```sh
-make e2e-test
-```
-
-## Pull Requests
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Make your changes
-4. Run tests and lint
-5. Commit your changes (`git commit -m 'Add some feature'`)
-6. Push to the branch (`git push origin feature/my-feature`)
-7. Open a Pull Request
-
-### PR Guidelines
-
-- Write clear commit messages
-- Add tests for new functionality
-- Update documentation if needed
-- Ensure CI passes
-
-## Pre-commit Hooks
-
-```sh
-make install-pre-commit
-pre-commit run --all-files
-```
+- [ ] `go build ./...` passes
+- [ ] `make test` passes
+- [ ] `golangci-lint run` passes
 
 ## Questions?
 
-Open an issue for bugs, features, or questions.
+Open an [issue](https://github.com/hibare/headscale-client-go/issues).

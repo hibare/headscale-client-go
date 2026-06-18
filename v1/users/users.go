@@ -17,6 +17,16 @@ type UserResourceInterface interface {
 	Rename(ctx context.Context, id, newName string) (UserResponse, error)
 }
 
+// UserResource is a struct that implements the UserResourceInterface.
+type UserResource struct {
+	r requests.RequestInterface
+}
+
+// NewUserResource creates a new UserResource.
+func NewUserResource(r requests.RequestInterface) *UserResource {
+	return &UserResource{r: r}
+}
+
 // User represents a user in Headscale.
 type User struct {
 	ID            string    `json:"id"`
@@ -29,7 +39,7 @@ type User struct {
 	ProfilePicURL string    `json:"profilePicUrl"`
 }
 
-// UsersResponse represents a single user response from the API.
+// UsersResponse represents a list of users response from the API.
 type UsersResponse struct {
 	Users []User `json:"users"`
 }
@@ -57,15 +67,15 @@ func (u *UserResource) List(ctx context.Context, filter UserListFilter) (UsersRe
 		queryParams["email"] = filter.Email
 	}
 
-	url := u.R.BuildURL("user")
-	req, err := u.R.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{
+	url := u.r.BuildURL("user")
+	req, err := u.r.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{
 		QueryParams: queryParams,
 	})
 	if err != nil {
 		return users, err
 	}
 
-	err = u.R.Do(ctx, req, &users)
+	err = u.r.Do(ctx, req, &users)
 	return users, err
 }
 
@@ -86,44 +96,39 @@ type CreateUserRequest struct {
 func (u *UserResource) Create(ctx context.Context, createUserRequest CreateUserRequest) (UserResponse, error) {
 	var user UserResponse
 
-	url := u.R.BuildURL("user")
-	req, err := u.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := u.r.BuildURL("user")
+	req, err := u.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: createUserRequest,
 	})
 	if err != nil {
 		return user, err
 	}
 
-	err = u.R.Do(ctx, req, &user)
+	err = u.r.Do(ctx, req, &user)
 	return user, err
 }
 
 // Delete removes a user from the Headscale.
 func (u *UserResource) Delete(ctx context.Context, id string) error {
-	url := u.R.BuildURL("user", id)
-	req, err := u.R.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{})
+	url := u.r.BuildURL("user", id)
+	req, err := u.r.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{})
 	if err != nil {
 		return err
 	}
 
-	return u.R.Do(ctx, req, nil)
+	return u.r.Do(ctx, req, nil)
 }
 
 // Rename renames a user in the Headscale.
 func (u *UserResource) Rename(ctx context.Context, id, newName string) (UserResponse, error) {
 	var user UserResponse
 
-	url := u.R.BuildURL("user", id, "rename", newName)
-	req, err := u.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
+	url := u.r.BuildURL("user", id, "rename", newName)
+	req, err := u.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
 	if err != nil {
 		return user, err
 	}
 
-	err = u.R.Do(ctx, req, &user)
+	err = u.r.Do(ctx, req, &user)
 	return user, err
-}
-
-// UserResource is a struct that implements the UserResourceInterface.
-type UserResource struct {
-	R requests.RequestInterface
 }

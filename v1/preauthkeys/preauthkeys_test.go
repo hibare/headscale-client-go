@@ -1,254 +1,88 @@
 package preauthkeys
 
 import (
-	"errors"
+	"context"
 	"net/http"
-	"net/url"
 	"testing"
 	"time"
 
 	"github.com/hibare/headscale-client-go/requests"
+	"github.com/hibare/headscale-client-go/v1/testutil"
 	"github.com/hibare/headscale-client-go/v1/users"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
 
 func TestPreAuthKeyResource_List(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-		fakeResp := PreAuthKeysResponse{PreAuthKeys: []PreAuthKey{{ID: "1", User: users.User{ID: "u1", Name: "testuser"}}}}
+	fixture := testutil.TestFixture[PreAuthKeysResponse]{
+		Endpoint: "preauthkey",
+		Method:   http.MethodGet,
+		SuccessResp: PreAuthKeysResponse{
+			PreAuthKeys: []PreAuthKey{
+				{
+					ID:   "1",
+					User: users.User{ID: "u1", Name: "testuser"},
+				},
+			},
+		},
+	}
 
-		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodGet, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*preauthkeys.PreAuthKeysResponse")).Run(func(args mock.Arguments) {
-			resp := args.Get(2).(*PreAuthKeysResponse) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
-			*resp = fakeResp
-		}).Return(nil)
-
-		resp, err := p.List(ctx)
-		require.NoError(t, err)
-		assert.Equal(t, fakeResp, resp)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodGet, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		resp, err := p.List(ctx)
-		require.Error(t, err)
-		assert.Empty(t, resp.PreAuthKeys)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodGet, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*preauthkeys.PreAuthKeysResponse")).Return(errors.New("do error"))
-
-		resp, err := p.List(ctx)
-		require.Error(t, err)
-		assert.Empty(t, resp.PreAuthKeys)
-		mockReq.AssertExpectations(t)
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (PreAuthKeysResponse, error) {
+		p := &PreAuthKeyResource{r: mockReq}
+		return p.List(ctx)
 	})
 }
 
 func TestPreAuthKeyResource_Create(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		request := CreatePreAuthKeyRequest{
-			User:       "testuser",
-			Reusable:   true,
-			Ephemeral:  false,
-			Expiration: time.Now().Add(24 * time.Hour),
-			ACLTags:    []string{"tag:test"},
-		}
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-		fakeResp := PreAuthKeyResponse{
-			PreAuthKey: PreAuthKey{ID: "1", User: users.User{ID: "u1", Name: "testuser"}},
-		}
+	request := CreatePreAuthKeyRequest{
+		User:       "testuser",
+		Reusable:   true,
+		Ephemeral:  false,
+		Expiration: time.Now().Add(24 * time.Hour),
+		ACLTags:    []string{"tag:test"},
+	}
 
-		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*preauthkeys.PreAuthKeyResponse")).Run(func(args mock.Arguments) {
-			resp := args.Get(2).(*PreAuthKeyResponse) //nolint:errcheck // reason: type assertion on mock, error not possible/needed
-			*resp = fakeResp
-		}).Return(nil)
+	fixture := testutil.TestFixture[PreAuthKeyResponse]{
+		Endpoint: "preauthkey",
+		Method:   http.MethodPost,
+		SuccessResp: PreAuthKeyResponse{
+			PreAuthKey: PreAuthKey{
+				ID:   "1",
+				User: users.User{ID: "u1", Name: "testuser"},
+			},
+		},
+	}
 
-		resp, err := p.Create(ctx, request)
-		require.NoError(t, err)
-		assert.Equal(t, fakeResp, resp)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		request := CreatePreAuthKeyRequest{
-			User:       "testuser",
-			Reusable:   true,
-			Ephemeral:  false,
-			Expiration: time.Now().Add(24 * time.Hour),
-			ACLTags:    []string{"tag:test"},
-		}
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		resp, err := p.Create(ctx, request)
-		require.Error(t, err)
-		assert.Empty(t, resp.PreAuthKey)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		request := CreatePreAuthKeyRequest{
-			User:       "testuser",
-			Reusable:   true,
-			Ephemeral:  false,
-			Expiration: time.Now().Add(24 * time.Hour),
-			ACLTags:    []string{"tag:test"},
-		}
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, mock.AnythingOfType("*preauthkeys.PreAuthKeyResponse")).Return(errors.New("do error"))
-
-		resp, err := p.Create(ctx, request)
-		require.Error(t, err)
-		assert.Empty(t, resp.PreAuthKey)
-		mockReq.AssertExpectations(t)
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (PreAuthKeyResponse, error) {
+		p := &PreAuthKeyResource{r: mockReq}
+		return p.Create(ctx, request)
 	})
 }
 
 func TestPreAuthKeyResource_Expire(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
+	id := "1"
+	fixture := testutil.TestFixture[struct{}]{
+		Endpoint:    []any{"preauthkey", "expire"},
+		Method:      http.MethodPost,
+		SuccessResp: struct{}{},
+	}
 
-		mockReq.On("BuildURL", "preauthkey", "expire").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, nil).Return(nil)
-
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (struct{}, error) {
+		p := &PreAuthKeyResource{r: mockReq}
 		err := p.Expire(ctx, id)
-		require.NoError(t, err)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "preauthkey", "expire").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		err := p.Expire(ctx, id)
-		require.Error(t, err)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "preauthkey", "expire").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodPost, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, nil).Return(errors.New("do error"))
-
-		err := p.Expire(ctx, id)
-		require.Error(t, err)
-		mockReq.AssertExpectations(t)
+		return struct{}{}, err
 	})
 }
 
 func TestPreAuthKeyResource_Delete(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
+	id := "1"
+	fixture := testutil.TestFixture[struct{}]{
+		Endpoint:    "preauthkey",
+		Method:      http.MethodDelete,
+		SuccessResp: struct{}{},
+	}
 
-		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodDelete, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, nil).Return(nil)
-
+	testutil.RunResourceTest(t, fixture, func(ctx context.Context, mockReq *requests.MockRequest) (struct{}, error) {
+		p := &PreAuthKeyResource{r: mockReq}
 		err := p.Delete(ctx, id)
-		require.NoError(t, err)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("build request error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodDelete, fakeURL, mock.Anything).Return(fakeReq, errors.New("build error"))
-
-		err := p.Delete(ctx, id)
-		require.Error(t, err)
-		mockReq.AssertExpectations(t)
-	})
-
-	t.Run("do error", func(t *testing.T) {
-		mockReq := new(requests.MockRequest)
-		p := &PreAuthKeyResource{R: mockReq}
-		ctx := t.Context()
-		id := "1"
-		fakeURL := &url.URL{Scheme: "http", Host: "example.com"}
-		fakeReq := &http.Request{}
-
-		mockReq.On("BuildURL", "preauthkey").Return(fakeURL)
-		mockReq.On("BuildRequest", ctx, http.MethodDelete, fakeURL, mock.Anything).Return(fakeReq, nil)
-		mockReq.On("Do", ctx, fakeReq, nil).Return(errors.New("do error"))
-
-		err := p.Delete(ctx, id)
-		require.Error(t, err)
-		mockReq.AssertExpectations(t)
+		return struct{}{}, err
 	})
 }

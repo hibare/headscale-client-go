@@ -11,6 +11,7 @@ import (
 	"time"
 
 	hsClient "github.com/hibare/headscale-client-go/v1/client"
+	"github.com/hibare/headscale-client-go/v1/nodes"
 	"github.com/hibare/headscale-client-go/v1/preauthkeys"
 	"github.com/hibare/headscale-client-go/v1/users"
 	"github.com/stretchr/testify/suite"
@@ -24,7 +25,6 @@ const (
 	tailscaleImage   = "tailscale/tailscale:latest"
 	containerTimeout = 5 * time.Minute
 	testUser         = "testuser"
-	nodeWaitTime     = 15 * time.Second
 )
 
 type E2ESuite struct {
@@ -80,7 +80,21 @@ func (s *E2ESuite) SetupSuite() {
 
 	s.tsNodeContainers = []testcontainers.Container{tsNode1, tsNode2}
 
-	time.Sleep(nodeWaitTime)
+	s.T().Log("Waiting for nodes to register...")
+	pollTicker := time.NewTicker(1 * time.Second)
+	defer pollTicker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			s.T().Fatalf("Timed out waiting for 2 nodes to register")
+		case <-pollTicker.C:
+			nodesResp, listErr := s.client.Nodes().List(ctx, nodes.NodeListFilter{})
+			if listErr == nil && len(nodesResp.Nodes) >= 2 {
+				s.T().Logf("Found %d registered nodes", len(nodesResp.Nodes))
+				return
+			}
+		}
+	}
 }
 
 func (s *E2ESuite) TearDownSuite() {

@@ -20,8 +20,19 @@ type NodeResourceInterface interface {
 	Delete(ctx context.Context, id string) error
 	Expire(ctx context.Context, id string) error
 	Rename(ctx context.Context, id, name string) (NodeResponse, error)
+	ApproveRoutes(ctx context.Context, id string, routes []string) (NodeResponse, error)
 	AddTags(ctx context.Context, id string, tags []string) (NodeResponse, error)
-	BackFillIP(ctx context.Context, confirm bool) (BackfillIPsResponse, error)
+	BackfillIPs(ctx context.Context, confirm bool) (BackfillIPsResponse, error)
+}
+
+// NodeResource is a struct that provides methods to interact with the nodes API of Headscale.
+type NodeResource struct {
+	r requests.RequestInterface
+}
+
+// NewNodeResource creates a new NodeResource.
+func NewNodeResource(r requests.RequestInterface) *NodeResource {
+	return &NodeResource{r: r}
 }
 
 // Node represents a node in Headscale.
@@ -75,15 +86,15 @@ func (n *NodeResource) List(ctx context.Context, filter NodeListFilter) (NodesRe
 		queryParams["user"] = filter.User
 	}
 
-	url := n.R.BuildURL("node")
-	req, err := n.R.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{
+	url := n.r.BuildURL("node")
+	req, err := n.r.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{
 		QueryParams: queryParams,
 	})
 	if err != nil {
 		return nodes, err
 	}
 
-	err = n.R.Do(ctx, req, &nodes)
+	err = n.r.Do(ctx, req, &nodes)
 	return nodes, err
 }
 
@@ -91,13 +102,13 @@ func (n *NodeResource) List(ctx context.Context, filter NodeListFilter) (NodesRe
 func (n *NodeResource) Get(ctx context.Context, id string) (NodeResponse, error) {
 	var node NodeResponse
 
-	url := n.R.BuildURL("node", id)
-	req, err := n.R.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
+	url := n.r.BuildURL("node", id)
+	req, err := n.r.BuildRequest(ctx, http.MethodGet, url, requests.RequestOptions{})
 	if err != nil {
 		return node, err
 	}
 
-	err = n.R.Do(ctx, req, &node)
+	err = n.r.Do(ctx, req, &node)
 	return node, err
 }
 
@@ -105,9 +116,9 @@ func (n *NodeResource) Get(ctx context.Context, id string) (NodeResponse, error)
 func (n *NodeResource) Register(ctx context.Context, user, key string) (NodeResponse, error) {
 	var node NodeResponse
 
-	url := n.R.BuildURL("node", "register")
-	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
-		QueryParams: map[string]interface{}{
+	url := n.r.BuildURL("node", "register")
+	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+		QueryParams: map[string]any{
 			"user": user,
 			"key":  key,
 		},
@@ -116,19 +127,19 @@ func (n *NodeResource) Register(ctx context.Context, user, key string) (NodeResp
 		return node, err
 	}
 
-	err = n.R.Do(ctx, req, &node)
+	err = n.r.Do(ctx, req, &node)
 	return node, err
 }
 
 // Delete removes a node from the Headscale.
 func (n *NodeResource) Delete(ctx context.Context, id string) error {
-	url := n.R.BuildURL("node", id)
-	req, err := n.R.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{})
+	url := n.r.BuildURL("node", id)
+	req, err := n.r.BuildRequest(ctx, http.MethodDelete, url, requests.RequestOptions{})
 	if err != nil {
 		return err
 	}
 
-	return n.R.Do(ctx, req, nil)
+	return n.r.Do(ctx, req, nil)
 }
 
 // ApproveRoutesRequest represents a request to approve routes for a node.
@@ -140,40 +151,40 @@ type ApproveRoutesRequest struct {
 func (n *NodeResource) ApproveRoutes(ctx context.Context, id string, routes []string) (NodeResponse, error) {
 	var node NodeResponse
 
-	url := n.R.BuildURL("node", id, "approve_routes")
-	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := n.r.BuildURL("node", id, "approve_routes")
+	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: ApproveRoutesRequest{Routes: routes},
 	})
 	if err != nil {
 		return node, err
 	}
 
-	err = n.R.Do(ctx, req, &node)
+	err = n.r.Do(ctx, req, &node)
 	return node, err
 }
 
 // Expire marks a node as expired in the Headscale.
 func (n *NodeResource) Expire(ctx context.Context, id string) error {
-	url := n.R.BuildURL("node", id, "expire")
-	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
+	url := n.r.BuildURL("node", id, "expire")
+	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
 	if err != nil {
 		return err
 	}
 
-	return n.R.Do(ctx, req, nil)
+	return n.r.Do(ctx, req, nil)
 }
 
 // Rename renames a node in the Headscale.
 func (n *NodeResource) Rename(ctx context.Context, id, name string) (NodeResponse, error) {
 	var node NodeResponse
 
-	url := n.R.BuildURL("node", id, "rename", name)
-	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
+	url := n.r.BuildURL("node", id, "rename", name)
+	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{})
 	if err != nil {
 		return node, err
 	}
 
-	err = n.R.Do(ctx, req, &node)
+	err = n.r.Do(ctx, req, &node)
 	return node, err
 }
 
@@ -186,15 +197,15 @@ type AddTagsRequest struct {
 func (n *NodeResource) AddTags(ctx context.Context, id string, tags []string) (NodeResponse, error) {
 	var node NodeResponse
 
-	url := n.R.BuildURL("node", id, "tags")
-	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+	url := n.r.BuildURL("node", id, "tags")
+	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		Body: AddTagsRequest{Tags: tags},
 	})
 	if err != nil {
 		return node, err
 	}
 
-	err = n.R.Do(ctx, req, &node)
+	err = n.r.Do(ctx, req, &node)
 	return node, err
 }
 
@@ -203,10 +214,10 @@ type BackfillIPsResponse struct {
 	Changes []string `json:"changes"`
 }
 
-// BackFillIP backfills the IP address for nodes in Headscale.
-func (n *NodeResource) BackFillIP(ctx context.Context, confirm bool) (BackfillIPsResponse, error) {
-	url := n.R.BuildURL("node", "backfillips")
-	req, err := n.R.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
+// BackfillIPs backfills the IP address for nodes in Headscale.
+func (n *NodeResource) BackfillIPs(ctx context.Context, confirm bool) (BackfillIPsResponse, error) {
+	url := n.r.BuildURL("node", "backfillips")
+	req, err := n.r.BuildRequest(ctx, http.MethodPost, url, requests.RequestOptions{
 		QueryParams: map[string]any{"confirmed": confirm},
 	})
 	if err != nil {
@@ -214,11 +225,6 @@ func (n *NodeResource) BackFillIP(ctx context.Context, confirm bool) (BackfillIP
 	}
 
 	var backfillIPs BackfillIPsResponse
-	err = n.R.Do(ctx, req, &backfillIPs)
+	err = n.r.Do(ctx, req, &backfillIPs)
 	return backfillIPs, err
-}
-
-// NodeResource is a struct that provides methods to interact with the nodes API of Headscale.
-type NodeResource struct {
-	R requests.RequestInterface
 }
