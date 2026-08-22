@@ -1,6 +1,6 @@
 module github.com/hibare/headscale-client-go/e2e
 
-go 1.26.4
+go 1.27.0
 
 require (
 	github.com/hibare/headscale-client-go v0.0.0
