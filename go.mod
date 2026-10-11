@@ -1,6 +1,6 @@
 module github.com/hibare/headscale-client-go
 
-go 1.26.4
+go 1.27.2
 
 require github.com/stretchr/testify v1.11.1
 
