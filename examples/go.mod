@@ -1,6 +1,6 @@
 module github.com/hibare/headscale-client-example
 
-go 1.27.2
+go 1.27.3
 
 // Comment out the following line to use the latest version of headscale-client-go from GitHub instead of the local copy.
 replace github.com/hibare/headscale-client-go => ../
