@@ -1,15 +1,17 @@
+# Managed by Axon; manual edits will be overwritten.
 version: 2
 updates:
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "friday"
       time: "00:30"
+      timezone: "UTC"
     target-branch: "main"
     cooldown:
-      default-days: 10
+      default-days: 5
     assignees:
       - "hibare"
     groups:
@@ -19,34 +21,18 @@ updates:
 
   # Maintain dependencies for Go mods
   - package-ecosystem: "gomod"
-    directory: "/"
+    directories:
+      - "/"
+      - "/e2e"
+      - "/examples"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "friday"
       time: "00:30"
+      timezone: "UTC"
     target-branch: "main"
     cooldown:
-      default-days: 10
-    assignees:
-      - "hibare"
-    allow:
-      # Allow only direct updates for
-      - dependency-type: "direct"
-    groups:
-      go:
-        patterns:
-          - "*"
-
-  # Maintain dependencies for Go mods in e2e
-  - package-ecosystem: "gomod"
-    directory: "/e2e"
-    schedule:
-      interval: "monthly"
-      day: "friday"
-      time: "00:30"
-    target-branch: "main"
-    cooldown:
-      default-days: 10
+      default-days: 5
     assignees:
       - "hibare"
     allow:
@@ -55,22 +41,18 @@ updates:
       go:
         patterns:
           - "*"
-
-  - package-ecosystem: gomod
-    directory: /examples
-    schedule:
-      interval: weekly
 
   # Maintain dependencies for pre-commit
   - package-ecosystem: "pre-commit"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "friday"
       time: "00:30"
+      timezone: "UTC"
     target-branch: "main"
     cooldown:
-      default-days: 10
+      default-days: 5
     assignees:
       - "hibare"
     groups:
