@@ -18,7 +18,7 @@ Go 1.26+, Headscale v0.28.0+
 
 ## Installation
 
-```
+```sh
 go get github.com/hibare/headscale-client-go
 ```
 

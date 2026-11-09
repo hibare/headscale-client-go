@@ -15,8 +15,8 @@ permissions:
 jobs:
   checks:
     permissions:
-      contents: read  # for actions/checkout to fetch code
-      pull-requests: read  # for golangci/golangci-lint-action to fetch pull requests
+      contents: read # for actions/checkout to fetch code
+      pull-requests: read # for golangci/golangci-lint-action to fetch pull requests
     runs-on: ubuntu-latest
     if: github.event_name != 'schedule'
     steps:
@@ -40,10 +40,17 @@ jobs:
         uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
         with:
           install-only: true
-          version: latest
+          version: v2.15.0
+
+      - name: Install gh actions-lock extension
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh extension install github/gh-actions-lock
 
       - name: Run pre-commit hooks
-        uses: hibare/.github/github/shared-workflows/pre-commit//@a81e8dcdc53e857e36124dd49644fc02e948dcf8 # v0.17.0
+        uses: hibare/.github/github/shared-workflows/pre-commit@v0.19.0
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   e2e-tests:
     runs-on: ubuntu-latest
