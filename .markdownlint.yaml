@@ -1,0 +1,12 @@
+# markdownlint configuration
+# MD013 (line-length) is disabled to match .editorconfig (max_line_length = off)
+MD013: false
+
+# MD033 (no-inline-html) is disabled for README centering and HTML formatting
+MD033: false
+
+# MD041 (first-line-heading) is disabled for README HTML banner
+MD041: false
+
+# MD036 (no-emphasis-as-heading) is disabled for tagline emphasis
+MD036: false
