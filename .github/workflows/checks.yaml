@@ -21,7 +21,7 @@ jobs:
     if: github.event_name != 'schedule'
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@v2.22.3
+        uses: step-security/harden-runner@v2.22.4
         with:
           egress-policy: audit
 
@@ -57,7 +57,7 @@ jobs:
     if: github.event_name == 'schedule'
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@v2.22.3
+        uses: step-security/harden-runner@v2.22.4
         with:
           egress-policy: audit
 
@@ -78,7 +78,7 @@ jobs:
     if: github.event_name != 'schedule'
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@v2.22.3
+        uses: step-security/harden-runner@v2.22.4
         with:
           egress-policy: audit
 
