@@ -24,7 +24,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: release-drafter/release-drafter@v7.10.0
+      - uses: release-drafter/release-drafter@v7.11.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -40,6 +40,6 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: release-drafter/release-drafter/autolabeler@v7.10.0
+      - uses: release-drafter/release-drafter/autolabeler@v7.11.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

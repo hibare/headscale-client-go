@@ -48,7 +48,7 @@ jobs:
         run: gh extension install github/gh-actions-lock
 
       - name: Run pre-commit hooks
-        uses: hibare/.github/github/shared-workflows/pre-commit@v0.19.0
+        uses: hibare/.github/github/shared-workflows/pre-commit@v0.20.0
         env:
           GH_TOKEN: ${{ github.token }}
 
