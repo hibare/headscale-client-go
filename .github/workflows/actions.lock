@@ -5,16 +5,16 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/checks.yaml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
         - 'actions/setup-python@v7.1.0'
         - 'golangci/golangci-lint-action@v9.3.0'
-        - 'hibare/.github@v0.19.0'
-        - 'step-security/harden-runner@v2.22.4'
+        - 'hibare/.github@v0.20.0'
+        - 'step-security/harden-runner@v2.23.0'
     '.github/workflows/release-drafter.yml':
-        - 'release-drafter/release-drafter@v7.10.0'
-        - 'step-security/harden-runner@v2.22.4'
+        - 'release-drafter/release-drafter@v7.11.0'
+        - 'step-security/harden-runner@v2.23.0'
 dependencies:
-    'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9':
+    'actions/cache@v6.1.0':
         ref: 'v6.1.0'
         commit: 'sha1-55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
         owner_id: 44036562
@@ -24,9 +24,9 @@ dependencies:
         commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
         owner_id: 44036562
         repo_id: 197814629
-    'actions/setup-go@v7.0.0':
-        ref: 'v7.0.0'
-        commit: 'sha1-b7ad1dad31e06c5925ef5d2fc7ad053ef454303e'
+    'actions/setup-go@v7.1.0':
+        ref: 'v7.1.0'
+        commit: 'sha1-d8cbb8045d7f43706b9177cceb36c1f91a6644d5'
         owner_id: 44036562
         repo_id: 192624594
     'actions/setup-python@v7.1.0':
@@ -39,20 +39,20 @@ dependencies:
         commit: 'sha1-ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a'
         owner_id: 35628013
         repo_id: 232539879
-    'hibare/.github@v0.19.0':
-        ref: 'v0.19.0'
-        commit: 'sha1-b8aae3d5a0c260fa954f47a505583eb1978ba0c1'
+    'hibare/.github@v0.20.0':
+        ref: 'v0.20.0'
+        commit: 'sha1-3c52fef6ef9f87bc665d686c2b580eb6df5efd33'
         owner_id: 20609766
         repo_id: 728721363
         uses:
-            - 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
-    'release-drafter/release-drafter@v7.10.0':
-        ref: 'v7.10.0'
-        commit: 'sha1-978bb0b30c5ee8cdd332ced253758157150d43f0'
+            - 'actions/cache@v6.1.0'
+    'release-drafter/release-drafter@v7.11.0':
+        ref: 'v7.11.0'
+        commit: 'sha1-d1a19e60e81a7e650d00a7de9277f87e439117ea'
         owner_id: 58292376
         repo_id: 139022359
-    'step-security/harden-runner@v2.22.4':
-        ref: 'v2.22.4'
-        commit: 'sha1-1d88384fd173af6ecb012dfd0264a306b711241a'
+    'step-security/harden-runner@v2.23.0':
+        ref: 'v2.23.0'
+        commit: 'sha1-aebdcf6156ab6691adf63218240e476564a1ed4c'
         owner_id: 88700172
         repo_id: 422287306
