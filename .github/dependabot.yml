@@ -6,7 +6,6 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-      day: "friday"
       time: "00:30"
       timezone: "UTC"
     target-branch: "main"
@@ -27,7 +26,6 @@ updates:
       - "/examples"
     schedule:
       interval: "monthly"
-      day: "friday"
       time: "00:30"
       timezone: "UTC"
     target-branch: "main"
@@ -47,7 +45,6 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-      day: "friday"
       time: "00:30"
       timezone: "UTC"
     target-branch: "main"
